@@ -119,22 +119,19 @@ npm run build
 ### Opcao A (atual): GitHub Pages, automatico
 
 O repositorio ja tem um fluxo de publicacao em `.github/workflows/deploy.yml`.
-A cada push na branch de desenvolvimento, o site e buildado e publicado sozinho.
+A cada push na branch de desenvolvimento, o site e buildado e publicado sozinho
+numa branch `gh-pages` (criada automaticamente pelo fluxo).
 
 Para ativar (so na primeira vez), pelo navegador, sem instalar nada:
 
-1. No GitHub, abra o repositorio e va em **Settings** (Configuracoes).
-2. No menu lateral, clique em **Pages**.
-3. Em **Build and deployment** > **Source**, escolha **GitHub Actions**.
-4. Pronto. O endereco do site aparece em **Settings > Pages** apos a primeira
-   publicacao. Tambem da pra acompanhar na aba **Actions**.
+1. Espere o fluxo rodar uma vez (aba **Actions** do repositorio, ate ficar verde).
+   Isso cria a branch `gh-pages`.
+2. No GitHub, va em **Settings** (Configuracoes) > **Pages**.
+3. Em **Build and deployment** > **Source**, escolha **Deploy from a branch**.
+4. Em **Branch**, selecione `gh-pages` e a pasta `/ (root)`. Clique em **Save**.
+5. Aguarde ~1 minuto. O endereco aparece ali em **Settings > Pages**.
 
 Endereco final: `https://bueno-valdir.github.io/lm_store/`.
-
-> Se aparecer um erro de "environment protection rules" (branch nao permitida),
-> va em **Settings > Environments > github-pages** e libere a branch atual em
-> **Deployment branches**. Ou rode manualmente em **Actions > Publicar no GitHub
-> Pages > Run workflow**.
 
 O caminho base do Pages (`/lm_store`) esta em `astro.config.mjs` (`base`). Os
 links internos usam o helper `src/lib/url.ts` (`withBase`), entao se adaptam ao

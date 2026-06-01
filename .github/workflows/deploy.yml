@@ -1,5 +1,6 @@
 # Publica o site no GitHub Pages automaticamente a cada push.
-# Faz o build estatico (Astro) e envia o resultado para o Pages.
+# Builda o site (Astro) e envia o resultado para a branch "gh-pages",
+# que o GitHub Pages serve. Metodo robusto, sem depender de protecao de ambiente.
 name: Publicar no GitHub Pages
 
 on:
@@ -10,20 +11,18 @@ on:
   # Permite acionar manualmente pelo botao "Run workflow" na aba Actions.
   workflow_dispatch:
 
-# Permissoes necessarias para publicar no Pages.
+# Permissao para o fluxo escrever a branch gh-pages.
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+  contents: write
 
-# Garante uma publicacao por vez, sem cancelar uma que ja esteja rodando.
+# Uma publicacao por vez.
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build do site
+  build-deploy:
+    name: Build e publicacao
     runs-on: ubuntu-latest
     steps:
       - name: Baixar o codigo
@@ -41,22 +40,10 @@ jobs:
       - name: Gerar o site estatico
         run: npm run build
 
-      - name: Configurar o Pages
-        uses: actions/configure-pages@v5
-
-      - name: Enviar artefato do site
-        uses: actions/upload-pages-artifact@v3
+      - name: Publicar na branch gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: ./dist
-
-  deploy:
-    name: Publicar
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Publicar no GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          # Mensagem de commit da publicacao.
+          commit_message: "Publicacao automatica do site"
