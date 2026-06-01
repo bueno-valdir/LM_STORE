@@ -1,0 +1,40 @@
+# Sobe a Lojinha da Miih como um container estatico (nginx:alpine) conectado ao
+# Traefik que JA roda no VPS (o mesmo do n8n). Nao mexe em n8n nem em ativobp.
+#
+# Como funciona:
+#   - serve os arquivos do site que ficam em /var/www/lmstore (no host),
+#     montados dentro do container. O deploy do GitHub joga os arquivos ali.
+#   - o Traefik roteia lmstore.veraxlegalops.com.br para este container e
+#     cuida do HTTPS automatico.
+#
+# !!! CONFIRMAR 2 VALORES com base no `docker inspect` do seu Traefik/n8n:
+#   (A) o NOME DA REDE do Traefik  -> abaixo em `networks` (placeholder: n8n_default)
+#   (B) o NOME DO CERTRESOLVER     -> nas labels (placeholder: mytlschallenge)
+#       (no n8n aparece como traefik.http.routers.<nome>.tls.certresolver=...)
+#
+# Subir (na pasta onde estiver este arquivo, no VPS):
+#   docker compose -f lmstore-docker-compose.yml up -d
+
+services:
+  lmstore:
+    image: nginx:alpine
+    container_name: lmstore
+    restart: unless-stopped
+    volumes:
+      # Pasta no host (DEPLOY_PATH do deploy) servida pelo nginx do container.
+      - /var/www/lmstore:/usr/share/nginx/html:ro
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n_default            # (A) confirmar nome da rede
+      - traefik.http.routers.lmstore.rule=Host(`lmstore.veraxlegalops.com.br`)
+      - traefik.http.routers.lmstore.entrypoints=websecure
+      - traefik.http.routers.lmstore.tls=true
+      - traefik.http.routers.lmstore.tls.certresolver=mytlschallenge  # (B) confirmar
+      - traefik.http.services.lmstore.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    external: true
+    name: n8n_default                                 # (A) confirmar nome da rede
