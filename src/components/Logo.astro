@@ -11,14 +11,14 @@ import { site } from '../config/site';
 ---
 
 <span class="inline-flex items-center gap-2" aria-label={site.nome}>
-  <!-- Anel com gradiente da marca (placeholder do logo). -->
+  <!-- Anel rosa choque (placeholder do logo). Aparece sobre fundo escuro. -->
   <span
-    class="grid h-9 w-9 place-items-center rounded-full bg-gradiente-marca text-fundo"
+    class="grid h-9 w-9 place-items-center rounded-full bg-gradiente-marca text-white"
     aria-hidden="true"
   >
-    <span class="grid h-7 w-7 place-items-center rounded-full bg-fundo font-manuscrita text-base text-marca">
+    <span class="grid h-7 w-7 place-items-center rounded-full bg-preto font-manuscrita text-base text-marca-claro">
       M
     </span>
   </span>
-  <span class="font-manuscrita text-xl leading-none text-texto">{site.nome}</span>
+  <span class="font-manuscrita text-xl leading-none text-white">{site.nome}</span>
 </span>

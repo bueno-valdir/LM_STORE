@@ -34,7 +34,7 @@ import { site } from '../config/site';
         <ul class="mt-4 space-y-3 text-texto-suave">
           <li>
             <span class="font-semibold text-texto">Instagram:</span>{' '}
-            <a class="text-marca hover:underline" href={site.instagramUrl} target="_blank" rel="noopener">
+            <a class="text-marca-escuro hover:underline" href={site.instagramUrl} target="_blank" rel="noopener">
               @{site.instagramUsuario}
             </a>
           </li>
@@ -44,7 +44,7 @@ import { site } from '../config/site';
           {site.email && (
             <li>
               <span class="font-semibold text-texto">E-mail:</span>{' '}
-              <a class="text-marca hover:underline" href={`mailto:${site.email}`}>{site.email}</a>
+              <a class="text-marca-escuro hover:underline" href={`mailto:${site.email}`}>{site.email}</a>
             </li>
           )}
           {

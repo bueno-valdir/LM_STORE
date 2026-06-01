@@ -25,7 +25,7 @@ const promocoes = listarPromocoes();
 
     <div class="container-loja grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
       <div>
-        <span class="etiqueta bg-fundo-claro text-marca">
+        <span class="etiqueta bg-marca/10 text-marca-escuro">
           {site.anosDeTradicao} anos de tradicao
         </span>
         <h1 class="mt-4 font-titulo text-4xl font-bold leading-tight text-texto sm:text-5xl">
@@ -47,7 +47,7 @@ const promocoes = listarPromocoes();
         <div class="aspect-square rounded-marca border border-fundo-borda bg-fundo-claro p-6">
           <div class="grid h-full place-items-center rounded-marca bg-gradiente-marca/10">
             <div class="text-center">
-              <div class="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradiente-marca text-fundo">
+              <div class="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradiente-marca text-white">
                 <span class="font-manuscrita text-3xl">M</span>
               </div>
               <p class="mt-4 font-manuscrita text-2xl text-texto">{site.nome}</p>
@@ -64,13 +64,13 @@ const promocoes = listarPromocoes();
   {
     promocoes.length > 0 && (
       <section class="bg-gradiente-marca">
-        <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-fundo">
+        <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-white">
           <p class="font-titulo font-semibold">
             Promocoes da semana com precinho que cabe no bolso
           </p>
           <a
             href={withBase('/catalogo#promocoes')}
-            class="rounded-marca bg-fundo px-4 py-2 text-sm font-semibold text-texto transition-transform hover:scale-[1.02]"
+            class="rounded-marca bg-white px-4 py-2 text-sm font-semibold text-preto transition-transform hover:scale-[1.02]"
           >
             Ver promocoes
           </a>
@@ -86,7 +86,7 @@ const promocoes = listarPromocoes();
         <h2 class="font-titulo text-2xl font-bold text-texto">Destaques</h2>
         <p class="text-sm text-texto-suave">Queridinhos selecionados pra voce.</p>
       </div>
-      <a href={withBase('/catalogo')} class="text-sm font-medium text-marca hover:underline">Ver tudo</a>
+      <a href={withBase('/catalogo')} class="text-sm font-medium text-marca-escuro hover:underline">Ver tudo</a>
     </div>
 
     {

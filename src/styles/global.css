@@ -38,18 +38,18 @@
     @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
   }
 
-  /* Botao principal com o gradiente da marca. */
+  /* Botao principal: rosa choque solido com texto branco. */
   .btn-marca {
     @apply inline-flex items-center justify-center gap-2 rounded-marca
-      bg-gradiente-marca px-5 py-3 font-titulo font-semibold text-fundo
-      shadow-marca transition-transform duration-200 hover:scale-[1.02]
-      focus-visible:scale-[1.02];
+      bg-marca px-5 py-3 font-titulo font-semibold text-white
+      shadow-marca transition-colors duration-200 hover:bg-marca-escuro
+      focus-visible:bg-marca-escuro;
   }
 
   /* Botao secundario, contorno suave. */
   .btn-contorno {
     @apply inline-flex items-center justify-center gap-2 rounded-marca
-      border border-fundo-borda bg-fundo-claro px-5 py-3 font-titulo
+      border border-fundo-borda bg-fundo px-5 py-3 font-titulo
       font-semibold text-texto transition-colors duration-200
       hover:border-marca hover:text-marca;
   }

@@ -94,8 +94,8 @@ const capa = produto.imagens[0];
 
         <!-- Etiquetas de status. -->
         <div class="mt-3 flex flex-wrap gap-2">
-          {temPromocao && <span class="etiqueta bg-gradiente-marca text-fundo">Promocao</span>}
-          <span class={`etiqueta ${esgotado ? 'bg-fundo-claro text-texto-suave' : 'bg-fundo-claro text-marca'}`}>
+          {temPromocao && <span class="etiqueta bg-marca text-white">Promocao</span>}
+          <span class={`etiqueta ${esgotado ? 'bg-fundo-claro text-texto-suave' : 'bg-marca/10 text-marca-escuro'}`}>
             {esgotado ? 'Esgotado' : 'Em estoque'}
           </span>
         </div>

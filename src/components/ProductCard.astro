@@ -22,9 +22,9 @@ const precoDeFmt = formatarPreco(precoDe);
 
 <a
   href={withBase(`/produtos/${produto.id}`)}
-  class="group flex flex-col overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro transition-colors hover:border-marca"
+  class="group flex flex-col overflow-hidden rounded-marca border border-fundo-borda bg-fundo shadow-card transition-colors hover:border-marca"
 >
-  <div class="relative aspect-square overflow-hidden bg-fundo">
+  <div class="relative aspect-square overflow-hidden bg-fundo-claro">
     <img
       src={withBase(capa?.src ?? '')}
       alt={capa?.alt}
@@ -38,10 +38,10 @@ const precoDeFmt = formatarPreco(precoDe);
     <!-- Etiquetas sobre a imagem. -->
     <div class="absolute left-2 top-2 flex flex-col gap-1">
       {temPromocao && (
-        <span class="etiqueta bg-gradiente-marca text-fundo">Promocao</span>
+        <span class="etiqueta bg-marca text-white">Promocao</span>
       )}
       {esgotado && (
-        <span class="etiqueta bg-fundo/80 text-texto-suave">Esgotado</span>
+        <span class="etiqueta bg-preto/80 text-white">Esgotado</span>
       )}
     </div>
   </div>

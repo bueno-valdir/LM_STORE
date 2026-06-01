@@ -35,7 +35,7 @@ const filtros = [
         filtros.map((filtro, i) => (
           <button
             type="button"
-            class="filtro-btn etiqueta border border-fundo-borda bg-fundo-claro text-texto-suave aria-selected:bg-gradiente-marca aria-selected:text-fundo"
+            class="filtro-btn etiqueta border border-fundo-borda bg-fundo-claro text-texto-suave aria-selected:border-marca aria-selected:bg-marca aria-selected:text-white"
             data-filtro={filtro.valor}
             role="tab"
             aria-selected={i === 0 ? 'true' : 'false'}
