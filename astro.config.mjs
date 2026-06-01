@@ -3,19 +3,22 @@ import tailwind from '@astrojs/tailwind';
 import sitemap from '@astrojs/sitemap';
 
 /**
- * URL e caminho base do site.
+ * URL e caminho base do site (configuraveis por ambiente).
  *
- * Hoje publicamos no GitHub Pages, que serve o projeto num subcaminho com o
- * nome EXATO do repositorio (https://bueno-valdir.github.io/LM_STORE/). O Pages
- * diferencia maiusculas/minusculas no caminho, entao BASE_PATH precisa bater
- * com o nome do repositorio (LM_STORE, em maiusculas).
+ * Sao lidos de variaveis de ambiente para o mesmo codigo servir em dois lugares:
  *
- * Ao migrar para o dominio proprio (ex.: loja.veraxlegalops.com.br), que serve
- * na raiz, basta trocar SITE_URL e deixar BASE_PATH como '/'. Os links internos
- * usam o helper withBase(), entao se adaptam sozinhos.
+ * - GitHub Pages (rascunho/teste): serve num subcaminho com o nome do
+ *   repositorio. Padrao: SITE_URL = https://bueno-valdir.github.io e
+ *   SITE_BASE = /LM_STORE. O Pages diferencia maiusculas, por isso /LM_STORE.
+ *
+ * - Hostinger (dominio proprio): serve na raiz. O fluxo de deploy define
+ *   SITE_BASE = "/" e SITE_URL = o dominio real (ex.: https://seudominio.com.br).
+ *
+ * Para mudar fora de CI, basta exportar as variaveis antes do build, ex.:
+ *   SITE_BASE=/ SITE_URL=https://seudominio.com.br npm run build
  */
-const SITE_URL = 'https://bueno-valdir.github.io';
-const BASE_PATH = '/LM_STORE';
+const SITE_URL = process.env.SITE_URL || 'https://bueno-valdir.github.io';
+const BASE_PATH = process.env.SITE_BASE || '/LM_STORE';
 
 // https://astro.build/config
 export default defineConfig({

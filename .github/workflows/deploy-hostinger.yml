@@ -1,0 +1,75 @@
+# Deploy automatico para o VPS da Hostinger via SSH (rsync sobre SFTP).
+#
+# Este fluxo so roda quando a variavel DEPLOY_ENABLED estiver definida como
+# "true" no repositorio (Settings > Secrets and variables > Actions > Variables).
+# Assim ele nao falha enquanto os dados de acesso ainda nao foram cadastrados.
+#
+# Segredos necessarios (Settings > Secrets and variables > Actions > Secrets):
+#   DEPLOY_HOST      -> IP ou dominio do VPS (ex.: 123.45.67.89)
+#   DEPLOY_USER      -> usuario SSH (ex.: root)
+#   DEPLOY_PASSWORD  -> senha SSH do VPS
+#   DEPLOY_PATH      -> pasta servida pelo nginx (ex.: /var/www/lojinhadamiih)
+#   DEPLOY_PORT      -> (opcional) porta SSH, padrao 22
+#
+# Variaveis (Actions > Variables):
+#   DEPLOY_ENABLED   -> "true" para ligar o deploy automatico
+#   SITE_URL         -> dominio publico (ex.: https://seudominio.com.br) para SEO
+name: Deploy na Hostinger (VPS)
+
+on:
+  push:
+    branches:
+      - claude/fervent-allen-VGls2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build e envio para o VPS
+    runs-on: ubuntu-latest
+    # So executa quando o deploy estiver ligado explicitamente.
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+    steps:
+      - name: Baixar o codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Gerar o site (servido na raiz do dominio)
+        env:
+          # No dominio proprio o site fica na raiz, entao base = "/".
+          SITE_BASE: "/"
+          # URL publica para canonical, Open Graph e sitemap.
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: npm run build
+
+      - name: Instalar ferramentas de envio
+        run: sudo apt-get update && sudo apt-get install -y rsync sshpass
+
+      - name: Enviar arquivos para o VPS (rsync sobre SSH)
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+        run: |
+          PORT="${DEPLOY_PORT:-22}"
+          # Sincroniza o conteudo de dist/ para a pasta do site no VPS.
+          # --delete remove no servidor o que nao existe mais no build.
+          sshpass -p "$DEPLOY_PASSWORD" rsync -az --delete \
+            -e "ssh -p $PORT -o StrictHostKeyChecking=no" \
+            ./dist/ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
