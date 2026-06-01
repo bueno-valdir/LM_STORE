@@ -1,0 +1,17 @@
+<!-- Imagem de preview (Open Graph) placeholder.
+     TODO (assets reais): substituir por um banner real 1200x630 (de preferencia .jpg/.png)
+     com o logo oficial da marca, e atualizar o caminho em BaseLayout.astro. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5fa2"/>
+      <stop offset="0.55" stop-color="#ff8a4c"/>
+      <stop offset="1" stop-color="#ffcf5c"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="#171013"/>
+  <circle cx="600" cy="250" r="110" fill="none" stroke="url(#g)" stroke-width="10"/>
+  <text x="600" y="285" font-family="cursive" font-size="120" fill="#ff5fa2" text-anchor="middle">M</text>
+  <text x="600" y="450" font-family="cursive" font-size="64" fill="#f6eef1" text-anchor="middle">Lojinha da Miih</text>
+  <text x="600" y="510" font-family="sans-serif" font-size="30" fill="#c8b8c0" text-anchor="middle">Make e skincare que cabem no bolso</text>
+</svg>
