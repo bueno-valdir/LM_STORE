@@ -27,6 +27,21 @@ if [ "$(id -u)" -ne 0 ]; then
   echo "Rode como root (use: sudo bash setup-vps.sh)"; exit 1
 fi
 
+# Seguranca: este script so e adequado se o nginx for (ou vier a ser) o servidor
+# web da porta 80. Se outro processo (Docker, Caddy, Traefik) ja escuta a 80,
+# para aqui para nao conflitar com seus outros servicos (ex.: n8n).
+if command -v ss >/dev/null 2>&1; then
+  PORT80_OWNER="$(ss -tlnp 2>/dev/null | grep -E ':80 ' || true)"
+  if [ -n "$PORT80_OWNER" ] && ! echo "$PORT80_OWNER" | grep -q nginx; then
+    echo "ATENCAO: a porta 80 ja esta em uso por outro processo:"
+    echo "$PORT80_OWNER"
+    echo "Este script foi interrompido para nao conflitar com seus servicos."
+    echo "Fale com o time/dev antes de prosseguir (o site pode precisar entrar"
+    echo "como um novo bloco no seu proxy atual, e nao via nginx puro)."
+    exit 1
+  fi
+fi
+
 echo ">> Instalando nginx e certbot..."
 apt-get update
 apt-get install -y nginx certbot python3-certbot-nginx rsync
@@ -64,10 +79,8 @@ server {
 }
 NGINX
 
-echo ">> Ativando o site..."
+echo ">> Ativando o site (sem tocar em outros sites ja configurados)..."
 ln -sf /etc/nginx/sites-available/lmstore.conf /etc/nginx/sites-enabled/lmstore.conf
-# Remove o site padrao do nginx, se existir, para nao conflitar.
-rm -f /etc/nginx/sites-enabled/default
 
 echo ">> Testando e recarregando o nginx..."
 nginx -t
