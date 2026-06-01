@@ -7,6 +7,7 @@ import ProductCard from '../components/ProductCard.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { site } from '../config/site';
 import { listarDestaques, listarPromocoes } from '../lib/produtos';
+import { withBase } from '../lib/url';
 
 const destaques = listarDestaques();
 const promocoes = listarPromocoes();
@@ -36,7 +37,7 @@ const promocoes = listarPromocoes();
           {site.cidade}, com envio para todo o Brasil e pedido facil pelo WhatsApp.
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
-          <a href="/catalogo" class="btn-marca">Ver catalogo</a>
+          <a href={withBase('/catalogo')} class="btn-marca">Ver catalogo</a>
           <WhatsAppButton variante="contorno" rotulo="Falar no WhatsApp" />
         </div>
       </div>
@@ -68,7 +69,7 @@ const promocoes = listarPromocoes();
             Promocoes da semana com precinho que cabe no bolso
           </p>
           <a
-            href="/catalogo#promocoes"
+            href={withBase('/catalogo#promocoes')}
             class="rounded-marca bg-fundo px-4 py-2 text-sm font-semibold text-texto transition-transform hover:scale-[1.02]"
           >
             Ver promocoes
@@ -85,7 +86,7 @@ const promocoes = listarPromocoes();
         <h2 class="font-titulo text-2xl font-bold text-texto">Destaques</h2>
         <p class="text-sm text-texto-suave">Queridinhos selecionados pra voce.</p>
       </div>
-      <a href="/catalogo" class="text-sm font-medium text-marca hover:underline">Ver tudo</a>
+      <a href={withBase('/catalogo')} class="text-sm font-medium text-marca hover:underline">Ver tudo</a>
     </div>
 
     {

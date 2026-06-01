@@ -116,12 +116,37 @@ qualquer lugar.
 npm run build
 ```
 
-### Opcao A: Vercel ou Netlify (zero atrito)
+### Opcao A (atual): GitHub Pages, automatico
+
+O repositorio ja tem um fluxo de publicacao em `.github/workflows/deploy.yml`.
+A cada push na branch de desenvolvimento, o site e buildado e publicado sozinho.
+
+Para ativar (so na primeira vez), pelo navegador, sem instalar nada:
+
+1. No GitHub, abra o repositorio e va em **Settings** (Configuracoes).
+2. No menu lateral, clique em **Pages**.
+3. Em **Build and deployment** > **Source**, escolha **GitHub Actions**.
+4. Pronto. O endereco do site aparece em **Settings > Pages** apos a primeira
+   publicacao. Tambem da pra acompanhar na aba **Actions**.
+
+Endereco final: `https://bueno-valdir.github.io/lm_store/`.
+
+> Se aparecer um erro de "environment protection rules" (branch nao permitida),
+> va em **Settings > Environments > github-pages** e libere a branch atual em
+> **Deployment branches**. Ou rode manualmente em **Actions > Publicar no GitHub
+> Pages > Run workflow**.
+
+O caminho base do Pages (`/lm_store`) esta em `astro.config.mjs` (`base`). Os
+links internos usam o helper `src/lib/url.ts` (`withBase`), entao se adaptam ao
+caminho automaticamente.
+
+### Opcao B: Vercel ou Netlify (zero atrito)
 
 - Conecte o repositorio. Build command: `npm run build`. Output: `dist`.
 - O subdominio de staging pode apontar para esse deploy.
+- Como o Vercel/Netlify servem na raiz, ajuste `base` para `'/'` em `astro.config.mjs`.
 
-### Opcao B: VPS Hostinger com nginx
+### Opcao C: VPS Hostinger com nginx
 
 1. `npm run build` (gera `dist/`).
 2. Envie o conteudo de `dist/` para o servidor (ex.: `/var/www/lojinha-da-miih`).
@@ -131,8 +156,9 @@ npm run build
 ### Migracao para dominio proprio
 
 1. Atualize a constante `SITE_URL` em `astro.config.mjs`.
-2. Atualize o `Sitemap:` em `public/robots.txt`.
-3. Rebuild e redeploy.
+2. Coloque `BASE_PATH` como `'/'` em `astro.config.mjs` (dominio proprio serve na raiz).
+3. Atualize o `Sitemap:` em `public/robots.txt`.
+4. Rebuild e redeploy.
 
 ## Itens a anexar / confirmar
 

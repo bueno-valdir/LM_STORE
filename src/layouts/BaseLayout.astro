@@ -7,6 +7,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../config/site';
+import { withBase } from '../lib/url';
 
 interface Props {
   /** Titulo da pagina (sem o nome da marca, que e adicionado aqui). */
@@ -20,12 +21,13 @@ interface Props {
 const {
   titulo,
   descricao = site.descricao,
-  imagemOg = '/og-default.svg',
+  imagemOg = withBase('/og-default.svg'),
 } = Astro.props;
 
 const tituloCompleto = titulo ? `${titulo} | ${site.nome}` : `${site.nome} | ${site.slogan}`;
 
 // URL canonica e absoluta da imagem para o Open Graph.
+// Astro.url.pathname ja inclui o caminho base no build.
 const urlCanonica = new URL(Astro.url.pathname, Astro.site);
 const imagemOgAbsoluta = new URL(imagemOg, Astro.site);
 ---
@@ -35,7 +37,7 @@ const imagemOgAbsoluta = new URL(imagemOg, Astro.site);
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <meta name="generator" content={Astro.generator} />
 
     <title>{tituloCompleto}</title>

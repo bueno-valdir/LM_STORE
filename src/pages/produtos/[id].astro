@@ -7,6 +7,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import WhatsAppButton from '../../components/WhatsAppButton.astro';
 import { listarProdutos, precoVigente, formatarPreco, rotuloCategoria } from '../../lib/produtos';
 import { site } from '../../config/site';
+import { withBase } from '../../lib/url';
 import type { Produto } from '../../lib/types';
 
 export function getStaticPaths() {
@@ -31,12 +32,12 @@ const capa = produto.imagens[0];
 <BaseLayout
   titulo={produto.nome}
   descricao={produto.descricao}
-  imagemOg={capa?.src}
+  imagemOg={capa?.src ? withBase(capa.src) : undefined}
 >
   <article class="container-loja py-8">
     <!-- Trilha de navegacao simples. -->
     <nav class="mb-4 text-sm text-texto-suave" aria-label="Voce esta em">
-      <a href="/catalogo" class="hover:text-marca">Catalogo</a>
+      <a href={withBase('/catalogo')} class="hover:text-marca">Catalogo</a>
       <span aria-hidden="true"> / </span>
       <span class="text-texto">{produto.nome}</span>
     </nav>
@@ -47,7 +48,7 @@ const capa = produto.imagens[0];
         <div class="overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro">
           <img
             id="imagem-principal"
-            src={capa?.src}
+            src={withBase(capa?.src ?? '')}
             alt={capa?.alt}
             width="800"
             height="800"
@@ -64,12 +65,12 @@ const capa = produto.imagens[0];
                 <button
                   type="button"
                   class="miniatura overflow-hidden rounded-lg border border-fundo-borda bg-fundo-claro focus-visible:border-marca"
-                  data-src={img.src}
+                  data-src={withBase(img.src)}
                   data-alt={img.alt}
                   aria-label={`Ver imagem ${i + 1}`}
                 >
                   <img
-                    src={img.src}
+                    src={withBase(img.src)}
                     alt={img.alt}
                     width="160"
                     height="160"

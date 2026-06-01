@@ -2,5 +2,5 @@ User-agent: *
 Allow: /
 
 # Sitemap gerado pelo @astrojs/sitemap no build.
-# Atualizar o dominio ao migrar de staging para producao.
-Sitemap: https://loja.veraxlegalops.com.br/sitemap-index.xml
+# Atualizar a URL ao migrar de staging (GitHub Pages) para o dominio proprio.
+Sitemap: https://bueno-valdir.github.io/lm_store/sitemap-index.xml

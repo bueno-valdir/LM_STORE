@@ -6,6 +6,7 @@
 import Logo from './Logo.astro';
 import { site } from '../config/site';
 import { linkWhatsApp, mensagemGeral } from '../lib/whatsapp';
+import { withBase } from '../lib/url';
 
 const anoAtual = new Date().getFullYear();
 const linkWpp = linkWhatsApp(mensagemGeral());
@@ -24,10 +25,10 @@ const linkWpp = linkWhatsApp(mensagemGeral());
     <div>
       <h3 class="text-sm font-semibold text-texto">Navegue</h3>
       <ul class="mt-3 space-y-2 text-sm text-texto-suave">
-        <li><a class="hover:text-marca" href="/catalogo">Catalogo</a></li>
-        <li><a class="hover:text-marca" href="/catalogo#promocoes">Promocoes</a></li>
-        <li><a class="hover:text-marca" href="/entregas-e-pagamento">Entregas e pagamento</a></li>
-        <li><a class="hover:text-marca" href="/sobre">Sobre e contato</a></li>
+        <li><a class="hover:text-marca" href={withBase('/catalogo')}>Catalogo</a></li>
+        <li><a class="hover:text-marca" href={withBase('/catalogo#promocoes')}>Promocoes</a></li>
+        <li><a class="hover:text-marca" href={withBase('/entregas-e-pagamento')}>Entregas e pagamento</a></li>
+        <li><a class="hover:text-marca" href={withBase('/sobre')}>Sobre e contato</a></li>
       </ul>
     </div>
 

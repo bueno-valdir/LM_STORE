@@ -6,6 +6,7 @@
 import type { Produto } from '../lib/types';
 import { site } from '../config/site';
 import { precoVigente, formatarPreco, rotuloCategoria } from '../lib/produtos';
+import { withBase } from '../lib/url';
 
 interface Props {
   produto: Produto;
@@ -20,12 +21,12 @@ const precoDeFmt = formatarPreco(precoDe);
 ---
 
 <a
-  href={`/produtos/${produto.id}`}
+  href={withBase(`/produtos/${produto.id}`)}
   class="group flex flex-col overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro transition-colors hover:border-marca"
 >
   <div class="relative aspect-square overflow-hidden bg-fundo">
     <img
-      src={capa?.src}
+      src={withBase(capa?.src ?? '')}
       alt={capa?.alt}
       width="600"
       height="600"
