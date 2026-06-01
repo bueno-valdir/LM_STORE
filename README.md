@@ -143,12 +143,32 @@ caminho automaticamente.
 - O subdominio de staging pode apontar para esse deploy.
 - Como o Vercel/Netlify servem na raiz, ajuste `base` para `'/'` em `astro.config.mjs`.
 
-### Opcao C: VPS Hostinger com nginx
+### Opcao C: VPS Hostinger (dominio proprio, deploy automatico)
 
-1. `npm run build` (gera `dist/`).
-2. Envie o conteudo de `dist/` para o servidor (ex.: `/var/www/lojinha-da-miih`).
-3. Configure o `server` do nginx apontando `root` para essa pasta, com
-   `index index.html;` e `try_files $uri $uri/ =404;`.
+Dominio de staging atual: `lmstore.veraxlegalops.com.br`.
+
+O deploy e automatico via SSH (workflow `.github/workflows/deploy-hostinger.yml`).
+A cada push, o site e buildado na raiz (`SITE_BASE=/`) e enviado por rsync para a
+pasta servida pelo nginx no VPS.
+
+Passo a passo (primeira vez):
+
+1. **Configurar o nginx no VPS** (Ubuntu/Debian, como root). Copie o script
+   `deploy/setup-vps.sh` para o VPS e rode `bash setup-vps.sh`. Ele instala o
+   nginx, cria `/var/www/lmstore`, escreve a config e recarrega.
+2. **Apontar o DNS**: crie um registro A de `lmstore.veraxlegalops.com.br` para
+   o IP do VPS.
+3. **Cadastrar os acessos no GitHub** (Settings > Secrets and variables > Actions):
+   - Secrets: `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_PASSWORD`, `DEPLOY_PATH`
+     (`/var/www/lmstore`), e opcionalmente `DEPLOY_PORT`.
+   - Variables: `DEPLOY_ENABLED` = `true` e `SITE_URL` =
+     `https://lmstore.veraxlegalops.com.br`.
+4. **Disparar o deploy**: faca um push ou rode o workflow manualmente em
+   Actions > "Deploy na Hostinger (VPS)" > Run workflow.
+5. **Ativar HTTPS** (apos DNS propagar): no VPS, rode
+   `certbot --nginx -d lmstore.veraxlegalops.com.br`.
+
+O arquivo `deploy/nginx-lmstore.conf` e a referencia versionada da config do nginx.
 
 ### Migracao para dominio proprio
 
