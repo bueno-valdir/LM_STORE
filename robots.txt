@@ -3,4 +3,4 @@ Allow: /
 
 # Sitemap gerado pelo @astrojs/sitemap no build.
 # Atualizar a URL ao migrar de staging (GitHub Pages) para o dominio proprio.
-Sitemap: https://bueno-valdir.github.io/lm_store/sitemap-index.xml
+Sitemap: https://bueno-valdir.github.io/LM_STORE/sitemap-index.xml
