@@ -5,16 +5,17 @@ import sitemap from '@astrojs/sitemap';
 /**
  * URL e caminho base do site.
  *
- * Hoje publicamos no GitHub Pages, que serve o projeto num subcaminho
- * (https://bueno-valdir.github.io/lm_store/). Por isso definimos `base`.
+ * Hoje publicamos no GitHub Pages, que serve o projeto num subcaminho com o
+ * nome EXATO do repositorio (https://bueno-valdir.github.io/LM_STORE/). O Pages
+ * diferencia maiusculas/minusculas no caminho, entao BASE_PATH precisa bater
+ * com o nome do repositorio (LM_STORE, em maiusculas).
  *
  * Ao migrar para o dominio proprio (ex.: loja.veraxlegalops.com.br), que serve
- * na raiz, basta trocar SITE_URL e deixar BASE_PATH como '/' (string vazia
- * tambem funciona). Os links internos usam o helper withBase(), entao se
- * adaptam sozinhos.
+ * na raiz, basta trocar SITE_URL e deixar BASE_PATH como '/'. Os links internos
+ * usam o helper withBase(), entao se adaptam sozinhos.
  */
 const SITE_URL = 'https://bueno-valdir.github.io';
-const BASE_PATH = '/lm_store';
+const BASE_PATH = '/LM_STORE';
 
 // https://astro.build/config
 export default defineConfig({

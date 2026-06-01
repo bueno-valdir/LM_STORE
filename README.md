@@ -131,9 +131,9 @@ Para ativar (so na primeira vez), pelo navegador, sem instalar nada:
 4. Em **Branch**, selecione `gh-pages` e a pasta `/ (root)`. Clique em **Save**.
 5. Aguarde ~1 minuto. O endereco aparece ali em **Settings > Pages**.
 
-Endereco final: `https://bueno-valdir.github.io/lm_store/`.
+Endereco final: `https://bueno-valdir.github.io/LM_STORE/`.
 
-O caminho base do Pages (`/lm_store`) esta em `astro.config.mjs` (`base`). Os
+O caminho base do Pages (`/LM_STORE`) esta em `astro.config.mjs` (`base`). Os
 links internos usam o helper `src/lib/url.ts` (`withBase`), entao se adaptam ao
 caminho automaticamente.
 
