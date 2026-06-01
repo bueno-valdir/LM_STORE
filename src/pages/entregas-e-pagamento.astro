@@ -1,0 +1,52 @@
+---
+/**
+ * Pagina institucional: entregas e formas de pagamento.
+ * Textos placeholder; ajustar com as informacoes reais da loja.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { site } from '../config/site';
+---
+
+<BaseLayout
+  titulo="Entregas e pagamento"
+  descricao="Como funciona o envio para todo o Brasil e as formas de pagamento da Lojinha da Miih."
+>
+  <section class="container-loja py-10">
+    <h1 class="font-titulo text-3xl font-bold text-texto">Entregas e pagamento</h1>
+    <p class="mt-2 max-w-2xl text-texto-suave">
+      Enviamos para todo o Brasil, direto de {site.cidade}. O combinado final
+      (valor do frete, prazo e pagamento) e fechado com voce pelo WhatsApp.
+    </p>
+
+    <div class="mt-8 grid gap-6 md:grid-cols-2">
+      <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-6">
+        <h2 class="font-titulo text-xl font-semibold text-texto">Envio</h2>
+        <!-- TODO (confirmar): preencher prazos e transportadoras reais. -->
+        <ul class="mt-3 space-y-2 text-sm text-texto-suave">
+          <li>Envio para todo o Brasil.</li>
+          <li>Prazo informado no fechamento do pedido (placeholder).</li>
+          <li>Frete calculado conforme a regiao (placeholder).</li>
+          <li>Possibilidade de combinar entrega local em {site.cidade} (placeholder).</li>
+        </ul>
+      </div>
+
+      <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-6">
+        <h2 class="font-titulo text-xl font-semibold text-texto">Pagamento</h2>
+        <!-- TODO (confirmar): preencher formas de pagamento reais. -->
+        <ul class="mt-3 space-y-2 text-sm text-texto-suave">
+          <li>Pix (placeholder).</li>
+          <li>Cartao (placeholder).</li>
+          <li>Outras formas combinadas no atendimento (placeholder).</li>
+        </ul>
+        <p class="mt-3 text-xs text-texto-suave">
+          Nesta fase, o pedido e finalizado pelo WhatsApp (sem checkout online).
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-8">
+      <WhatsAppButton rotulo="Tirar duvidas no WhatsApp" />
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,158 @@
+---
+/**
+ * Pagina de detalhe do produto.
+ * Gerada estaticamente (uma pagina por produto) via getStaticPaths.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WhatsAppButton from '../../components/WhatsAppButton.astro';
+import { listarProdutos, precoVigente, formatarPreco, rotuloCategoria } from '../../lib/produtos';
+import { site } from '../../config/site';
+import type { Produto } from '../../lib/types';
+
+export function getStaticPaths() {
+  return listarProdutos().map((produto) => ({
+    params: { id: produto.id },
+    props: { produto },
+  }));
+}
+
+interface Props {
+  produto: Produto;
+}
+
+const { produto } = Astro.props;
+const { precoAtual, precoDe, temPromocao } = precoVigente(produto);
+const precoAtualFmt = formatarPreco(precoAtual);
+const precoDeFmt = formatarPreco(precoDe);
+const esgotado = produto.disponibilidade === 'esgotado';
+const capa = produto.imagens[0];
+---
+
+<BaseLayout
+  titulo={produto.nome}
+  descricao={produto.descricao}
+  imagemOg={capa?.src}
+>
+  <article class="container-loja py-8">
+    <!-- Trilha de navegacao simples. -->
+    <nav class="mb-4 text-sm text-texto-suave" aria-label="Voce esta em">
+      <a href="/catalogo" class="hover:text-marca">Catalogo</a>
+      <span aria-hidden="true"> / </span>
+      <span class="text-texto">{produto.nome}</span>
+    </nav>
+
+    <div class="grid gap-8 md:grid-cols-2">
+      <!-- GALERIA -->
+      <section>
+        <div class="overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro">
+          <img
+            id="imagem-principal"
+            src={capa?.src}
+            alt={capa?.alt}
+            width="800"
+            height="800"
+            loading="eager"
+            decoding="async"
+            class="aspect-square w-full object-cover"
+          />
+        </div>
+
+        {
+          produto.imagens.length > 1 && (
+            <div class="mt-3 grid grid-cols-4 gap-2">
+              {produto.imagens.map((img, i) => (
+                <button
+                  type="button"
+                  class="miniatura overflow-hidden rounded-lg border border-fundo-borda bg-fundo-claro focus-visible:border-marca"
+                  data-src={img.src}
+                  data-alt={img.alt}
+                  aria-label={`Ver imagem ${i + 1}`}
+                >
+                  <img
+                    src={img.src}
+                    alt={img.alt}
+                    width="160"
+                    height="160"
+                    loading="lazy"
+                    decoding="async"
+                    class="aspect-square w-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )
+        }
+      </section>
+
+      <!-- INFORMACOES -->
+      <section>
+        <span class="text-xs uppercase tracking-wide text-texto-suave">
+          {produto.marca} &middot; {rotuloCategoria(produto.categoria)}
+        </span>
+        <h1 class="mt-1 font-titulo text-3xl font-bold text-texto">{produto.nome}</h1>
+
+        <!-- Etiquetas de status. -->
+        <div class="mt-3 flex flex-wrap gap-2">
+          {temPromocao && <span class="etiqueta bg-gradiente-marca text-fundo">Promocao</span>}
+          <span class={`etiqueta ${esgotado ? 'bg-fundo-claro text-texto-suave' : 'bg-fundo-claro text-marca'}`}>
+            {esgotado ? 'Esgotado' : 'Em estoque'}
+          </span>
+        </div>
+
+        <!-- Preco. -->
+        <div class="mt-5">
+          {
+            site.mostrarPrecos && precoAtualFmt ? (
+              <div class="flex items-baseline gap-3">
+                <span class="font-titulo text-3xl font-bold text-marca">{precoAtualFmt}</span>
+                {temPromocao && precoDeFmt && (
+                  <span class="text-lg text-texto-suave line-through">{precoDeFmt}</span>
+                )}
+              </div>
+            ) : (
+              <span class="text-lg font-medium text-texto-suave">Consulte o valor no WhatsApp</span>
+            )
+          }
+        </div>
+
+        <!-- Atributos opcionais. -->
+        <dl class="mt-4 space-y-1 text-sm text-texto-suave">
+          {produto.tom && (
+            <div class="flex gap-2">
+              <dt class="font-semibold text-texto">Tom:</dt>
+              <dd>{produto.tom}</dd>
+            </div>
+          )}
+          {produto.volume && (
+            <div class="flex gap-2">
+              <dt class="font-semibold text-texto">Volume:</dt>
+              <dd>{produto.volume}</dd>
+            </div>
+          )}
+        </dl>
+
+        <p class="mt-5 leading-relaxed text-texto-suave">{produto.descricao}</p>
+
+        <!-- CTA de pedido. -->
+        <div class="mt-6">
+          <WhatsAppButton produto={produto} rotulo={esgotado ? 'Avise-me / Pedir mesmo assim' : 'Pedir no WhatsApp'} />
+          <p class="mt-2 text-xs text-texto-suave">
+            Voce sera levada ao WhatsApp com a mensagem do produto ja preenchida.
+          </p>
+        </div>
+      </section>
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  // Troca a imagem principal ao clicar numa miniatura da galeria.
+  const principal = document.getElementById('imagem-principal') as HTMLImageElement | null;
+  document.querySelectorAll<HTMLButtonElement>('.miniatura').forEach((botao) => {
+    botao.addEventListener('click', () => {
+      if (!principal) return;
+      principal.src = botao.dataset.src ?? principal.src;
+      principal.alt = botao.dataset.alt ?? principal.alt;
+    });
+  });
+</script>

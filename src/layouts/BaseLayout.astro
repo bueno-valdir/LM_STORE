@@ -1,0 +1,69 @@
+---
+/**
+ * Layout base de todas as paginas.
+ * Centraliza <head> (SEO + Open Graph), Header e Footer reaproveitaveis.
+ */
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../config/site';
+
+interface Props {
+  /** Titulo da pagina (sem o nome da marca, que e adicionado aqui). */
+  titulo?: string;
+  /** Descricao para SEO/Open Graph. Cai na descricao padrao do site. */
+  descricao?: string;
+  /** Imagem de preview (Open Graph). Caminho absoluto a partir de /public. */
+  imagemOg?: string;
+}
+
+const {
+  titulo,
+  descricao = site.descricao,
+  imagemOg = '/og-default.svg',
+} = Astro.props;
+
+const tituloCompleto = titulo ? `${titulo} | ${site.nome}` : `${site.nome} | ${site.slogan}`;
+
+// URL canonica e absoluta da imagem para o Open Graph.
+const urlCanonica = new URL(Astro.url.pathname, Astro.site);
+const imagemOgAbsoluta = new URL(imagemOg, Astro.site);
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descricao} />
+    <link rel="canonical" href={urlCanonica} />
+
+    <!-- Open Graph (preview ao compartilhar no Instagram/WhatsApp/Linktree). -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.nome} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descricao} />
+    <meta property="og:image" content={imagemOgAbsoluta} />
+    <meta property="og:url" content={urlCanonica} />
+    <meta property="og:locale" content="pt_BR" />
+
+    <!-- Twitter/X Card. -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={tituloCompleto} />
+    <meta name="twitter:description" content={descricao} />
+    <meta name="twitter:image" content={imagemOgAbsoluta} />
+
+    <meta name="theme-color" content="#171013" />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <Header />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

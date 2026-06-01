@@ -1,0 +1,116 @@
+---
+/**
+ * Home: hero com a identidade da marca, destaques, faixa de promocao e CTA.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { site } from '../config/site';
+import { listarDestaques, listarPromocoes } from '../lib/produtos';
+
+const destaques = listarDestaques();
+const promocoes = listarPromocoes();
+---
+
+<BaseLayout>
+  <!-- HERO -->
+  <section class="relative overflow-hidden">
+    <!-- Brilho do gradiente da marca ao fundo. -->
+    <div
+      class="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-gradiente-marca opacity-20 blur-3xl"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="container-loja grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
+      <div>
+        <span class="etiqueta bg-fundo-claro text-marca">
+          {site.anosDeTradicao} anos de tradicao
+        </span>
+        <h1 class="mt-4 font-titulo text-4xl font-bold leading-tight text-texto sm:text-5xl">
+          Beleza acessivel,
+          <span class="bg-gradiente-marca bg-clip-text text-transparent">real e sem filtro</span>
+        </h1>
+        <p class="mt-4 max-w-md text-texto-suave">
+          {site.slogan}. Maquiagem e skincare selecionados com carinho em
+          {site.cidade}, com envio para todo o Brasil e pedido facil pelo WhatsApp.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="/catalogo" class="btn-marca">Ver catalogo</a>
+          <WhatsAppButton variante="contorno" rotulo="Falar no WhatsApp" />
+        </div>
+      </div>
+
+      <!-- Cartao visual do hero (placeholder do logo/identidade). -->
+      <div class="relative">
+        <div class="aspect-square rounded-marca border border-fundo-borda bg-fundo-claro p-6">
+          <div class="grid h-full place-items-center rounded-marca bg-gradiente-marca/10">
+            <div class="text-center">
+              <div class="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradiente-marca text-fundo">
+                <span class="font-manuscrita text-3xl">M</span>
+              </div>
+              <p class="mt-4 font-manuscrita text-2xl text-texto">{site.nome}</p>
+              <!-- TODO (assets reais): trocar por foto/banner real da marca (Canva). -->
+              <p class="mt-1 text-xs text-texto-suave">Imagem placeholder (substituir)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAIXA DE PROMOCAO -->
+  {
+    promocoes.length > 0 && (
+      <section class="bg-gradiente-marca">
+        <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-fundo">
+          <p class="font-titulo font-semibold">
+            Promocoes da semana com precinho que cabe no bolso
+          </p>
+          <a
+            href="/catalogo#promocoes"
+            class="rounded-marca bg-fundo px-4 py-2 text-sm font-semibold text-texto transition-transform hover:scale-[1.02]"
+          >
+            Ver promocoes
+          </a>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- DESTAQUES -->
+  <section class="container-loja py-12">
+    <div class="mb-6 flex items-end justify-between">
+      <div>
+        <h2 class="font-titulo text-2xl font-bold text-texto">Destaques</h2>
+        <p class="text-sm text-texto-suave">Queridinhos selecionados pra voce.</p>
+      </div>
+      <a href="/catalogo" class="text-sm font-medium text-marca hover:underline">Ver tudo</a>
+    </div>
+
+    {
+      destaques.length > 0 ? (
+        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          {destaques.map((produto) => (
+            <ProductCard produto={produto} />
+          ))}
+        </div>
+      ) : (
+        <p class="text-texto-suave">Em breve, novos destaques por aqui.</p>
+      )
+    }
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="container-loja pb-12">
+    <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-8 text-center">
+      <h2 class="font-titulo text-2xl font-bold text-texto">Ficou com vontade?</h2>
+      <p class="mx-auto mt-2 max-w-md text-texto-suave">
+        Escolha seus produtos e finalize o pedido pelo WhatsApp, rapidinho e sem complicacao.
+      </p>
+      <div class="mt-5 flex justify-center">
+        <WhatsAppButton rotulo="Fazer meu pedido" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

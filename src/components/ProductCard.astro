@@ -1,0 +1,71 @@
+---
+/**
+ * Card de produto usado na home e no catalogo.
+ * Mostra capa, etiquetas (promocao/esgotado), nome, marca e preco.
+ */
+import type { Produto } from '../lib/types';
+import { site } from '../config/site';
+import { precoVigente, formatarPreco, rotuloCategoria } from '../lib/produtos';
+
+interface Props {
+  produto: Produto;
+}
+
+const { produto } = Astro.props;
+const { precoAtual, precoDe, temPromocao } = precoVigente(produto);
+const capa = produto.imagens[0];
+const esgotado = produto.disponibilidade === 'esgotado';
+const precoAtualFmt = formatarPreco(precoAtual);
+const precoDeFmt = formatarPreco(precoDe);
+---
+
+<a
+  href={`/produtos/${produto.id}`}
+  class="group flex flex-col overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro transition-colors hover:border-marca"
+>
+  <div class="relative aspect-square overflow-hidden bg-fundo">
+    <img
+      src={capa?.src}
+      alt={capa?.alt}
+      width="600"
+      height="600"
+      loading="lazy"
+      decoding="async"
+      class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+    />
+
+    <!-- Etiquetas sobre a imagem. -->
+    <div class="absolute left-2 top-2 flex flex-col gap-1">
+      {temPromocao && (
+        <span class="etiqueta bg-gradiente-marca text-fundo">Promocao</span>
+      )}
+      {esgotado && (
+        <span class="etiqueta bg-fundo/80 text-texto-suave">Esgotado</span>
+      )}
+    </div>
+  </div>
+
+  <div class="flex flex-1 flex-col gap-1 p-3">
+    <span class="text-xs uppercase tracking-wide text-texto-suave">
+      {produto.marca} &middot; {rotuloCategoria(produto.categoria)}
+    </span>
+    <h3 class="font-titulo text-sm font-semibold leading-snug text-texto">
+      {produto.nome}
+    </h3>
+
+    <div class="mt-auto pt-2">
+      {
+        site.mostrarPrecos && precoAtualFmt ? (
+          <div class="flex items-baseline gap-2">
+            <span class="font-titulo text-base font-bold text-marca">{precoAtualFmt}</span>
+            {temPromocao && precoDeFmt && (
+              <span class="text-xs text-texto-suave line-through">{precoDeFmt}</span>
+            )}
+          </div>
+        ) : (
+          <span class="text-sm font-medium text-texto-suave">Consultar no WhatsApp</span>
+        )
+      }
+    </div>
+  </div>
+</a>

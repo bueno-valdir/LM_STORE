@@ -1,0 +1,64 @@
+---
+/**
+ * Cabecalho reaproveitavel, responsivo e mobile-first.
+ * Menu compacto com toggle no celular (sem JS de framework, usa <details>).
+ */
+import Logo from './Logo.astro';
+
+const linksNav = [
+  { href: '/', rotulo: 'Inicio' },
+  { href: '/catalogo', rotulo: 'Catalogo' },
+  { href: '/catalogo#promocoes', rotulo: 'Promocoes' },
+  { href: '/entregas-e-pagamento', rotulo: 'Entregas' },
+  { href: '/sobre', rotulo: 'Sobre' },
+];
+---
+
+<header class="sticky top-0 z-40 border-b border-fundo-borda bg-fundo/90 backdrop-blur">
+  <div class="container-loja flex items-center justify-between py-3">
+    <a href="/" class="shrink-0">
+      <Logo />
+    </a>
+
+    <!-- Navegacao no desktop. -->
+    <nav class="hidden items-center gap-6 md:flex" aria-label="Navegacao principal">
+      {
+        linksNav.map((link) => (
+          <a
+            href={link.href}
+            class="text-sm font-medium text-texto-suave transition-colors hover:text-marca"
+          >
+            {link.rotulo}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- Menu no celular, usando <details> para nao depender de JS. -->
+    <details class="relative md:hidden">
+      <summary
+        class="grid h-10 w-10 cursor-pointer list-none place-items-center rounded-marca border border-fundo-borda text-texto"
+        aria-label="Abrir menu"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </summary>
+      <nav
+        class="absolute right-0 mt-2 w-48 rounded-marca border border-fundo-borda bg-fundo-claro p-2 shadow-marca"
+        aria-label="Navegacao principal"
+      >
+        {
+          linksNav.map((link) => (
+            <a
+              href={link.href}
+              class="block rounded-lg px-3 py-2 text-sm font-medium text-texto-suave transition-colors hover:bg-fundo hover:text-marca"
+            >
+              {link.rotulo}
+            </a>
+          ))
+        }
+      </nav>
+    </details>
+  </div>
+</header>

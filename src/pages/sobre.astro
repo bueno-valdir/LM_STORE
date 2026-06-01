@@ -1,0 +1,70 @@
+---
+/**
+ * Pagina Sobre e contato.
+ * Breve texto da marca, Instagram, WhatsApp e (opcional) endereco.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { site } from '../config/site';
+---
+
+<BaseLayout
+  titulo="Sobre e contato"
+  descricao="Conheca a Lojinha da Miih e fale com a gente pelo Instagram ou WhatsApp."
+>
+  <section class="container-loja py-10">
+    <div class="grid gap-10 md:grid-cols-2">
+      <div>
+        <h1 class="font-titulo text-3xl font-bold text-texto">Sobre a {site.nome}</h1>
+        <p class="mt-4 leading-relaxed text-texto-suave">
+          A {site.nome} nasceu da paixao por beleza acessivel, real e sem filtro.
+          Sao {site.anosDeTradicao} anos de tradicao levando maquiagem e skincare
+          que cabem no bolso, com aquele atendimento proximo e caloroso, direto de
+          {site.cidade} para todo o Brasil.
+        </p>
+        <p class="mt-4 leading-relaxed text-texto-suave">
+          Aqui a ideia e simples: produto bom, preco honesto e papo reto. Voce
+          escolhe, a gente conversa pelo WhatsApp e cuida do resto.
+        </p>
+        <!-- TODO (assets reais): ajustar o texto da marca com a historia real da loja. -->
+      </div>
+
+      <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-6">
+        <h2 class="font-titulo text-xl font-semibold text-texto">Fale com a gente</h2>
+        <ul class="mt-4 space-y-3 text-texto-suave">
+          <li>
+            <span class="font-semibold text-texto">Instagram:</span>{' '}
+            <a class="text-marca hover:underline" href={site.instagramUrl} target="_blank" rel="noopener">
+              @{site.instagramUsuario}
+            </a>
+          </li>
+          <li>
+            <span class="font-semibold text-texto">WhatsApp:</span> pedidos e duvidas no botao abaixo.
+          </li>
+          {site.email && (
+            <li>
+              <span class="font-semibold text-texto">E-mail:</span>{' '}
+              <a class="text-marca hover:underline" href={`mailto:${site.email}`}>{site.email}</a>
+            </li>
+          )}
+          {
+            site.mostrarEndereco && site.endereco && (
+              <li>
+                <span class="font-semibold text-texto">Endereco:</span> {site.endereco}
+              </li>
+            )
+          }
+          {
+            !site.mostrarEndereco && (
+              <li class="text-sm">Atendemos online e enviamos para todo o Brasil.</li>
+            )
+          }
+        </ul>
+
+        <div class="mt-6">
+          <WhatsAppButton rotulo="Chamar no WhatsApp" />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

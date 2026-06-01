@@ -1,0 +1,24 @@
+---
+/**
+ * Logo da marca.
+ *
+ * TODO (assets reais): substituir este placeholder pelo logo oficial do Canva
+ * (anel circular com gradiente rosa/laranja/dourado e nome manuscrito).
+ * Coloque o arquivo em /public/logo.svg (ou .png) e troque o markup abaixo por:
+ *   <img src="/logo.svg" alt="Lojinha da Miih" class="h-10 w-auto" />
+ */
+import { site } from '../config/site';
+---
+
+<span class="inline-flex items-center gap-2" aria-label={site.nome}>
+  <!-- Anel com gradiente da marca (placeholder do logo). -->
+  <span
+    class="grid h-9 w-9 place-items-center rounded-full bg-gradiente-marca text-fundo"
+    aria-hidden="true"
+  >
+    <span class="grid h-7 w-7 place-items-center rounded-full bg-fundo font-manuscrita text-base text-marca">
+      M
+    </span>
+  </span>
+  <span class="font-manuscrita text-xl leading-none text-texto">{site.nome}</span>
+</span>

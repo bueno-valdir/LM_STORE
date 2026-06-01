@@ -1,0 +1,108 @@
+---
+/**
+ * Catalogo: grade de produtos com filtro por categoria e atalho para promocoes.
+ * O filtro roda no cliente (JS leve), entao a pagina continua estatica/rapida.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { listarProdutos, categorias } from '../lib/produtos';
+
+const produtos = listarProdutos();
+
+// Filtros disponiveis: Todos, cada categoria e Promocoes.
+const filtros = [
+  { valor: 'todos', rotulo: 'Todos' },
+  ...categorias.map((c) => ({ valor: c.slug, rotulo: c.rotulo })),
+  { valor: 'promocao', rotulo: 'Promocoes' },
+];
+---
+
+<BaseLayout
+  titulo="Catalogo"
+  descricao="Veja toda a maquiagem e skincare da Lojinha da Miih e peca pelo WhatsApp."
+>
+  <section class="container-loja py-10">
+    <header class="mb-6">
+      <h1 class="font-titulo text-3xl font-bold text-texto">Catalogo</h1>
+      <p class="mt-1 text-texto-suave">
+        Filtre por categoria ou veja as promocoes. Toque no produto para ver os detalhes.
+      </p>
+    </header>
+
+    <!-- Filtros (ancoram #promocoes para o atalho do header/home). -->
+    <div id="promocoes" class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar produtos">
+      {
+        filtros.map((filtro, i) => (
+          <button
+            type="button"
+            class="filtro-btn etiqueta border border-fundo-borda bg-fundo-claro text-texto-suave aria-selected:bg-gradiente-marca aria-selected:text-fundo"
+            data-filtro={filtro.valor}
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+          >
+            {filtro.rotulo}
+          </button>
+        ))
+      }
+    </div>
+
+    <!-- Grade de produtos. Cada item carrega data-attrs para o filtro. -->
+    <div id="grade" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {
+        produtos.map((produto) => (
+          <div
+            class="produto-item"
+            data-categoria={produto.categoria}
+            data-promocao={produto.promocao ? 'sim' : 'nao'}
+          >
+            <ProductCard produto={produto} />
+          </div>
+        ))
+      }
+    </div>
+
+    <!-- Mensagem quando o filtro nao retorna nada. -->
+    <p id="vazio" class="hidden py-10 text-center text-texto-suave">
+      Nenhum produto nesta categoria por enquanto. Volte em breve.
+    </p>
+  </section>
+</BaseLayout>
+
+<script>
+  // Filtro de catalogo no cliente: mostra/esconde itens conforme o botao ativo.
+  const botoes = document.querySelectorAll<HTMLButtonElement>('.filtro-btn');
+  const itens = document.querySelectorAll<HTMLElement>('.produto-item');
+  const vazio = document.getElementById('vazio');
+
+  function aplicarFiltro(valor: string) {
+    let visiveis = 0;
+
+    itens.forEach((item) => {
+      const categoria = item.dataset.categoria;
+      const promocao = item.dataset.promocao === 'sim';
+
+      const mostra =
+        valor === 'todos' ||
+        (valor === 'promocao' ? promocao : categoria === valor);
+
+      item.classList.toggle('hidden', !mostra);
+      if (mostra) visiveis++;
+    });
+
+    vazio?.classList.toggle('hidden', visiveis > 0);
+  }
+
+  botoes.forEach((botao) => {
+    botao.addEventListener('click', () => {
+      botoes.forEach((b) => b.setAttribute('aria-selected', 'false'));
+      botao.setAttribute('aria-selected', 'true');
+      aplicarFiltro(botao.dataset.filtro ?? 'todos');
+    });
+  });
+
+  // Se a pagina abrir via #promocoes, ja aplica o filtro de promocoes.
+  if (location.hash === '#promocoes') {
+    const btnPromo = document.querySelector<HTMLButtonElement>('[data-filtro="promocao"]');
+    btnPromo?.click();
+  }
+</script>

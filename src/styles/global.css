@@ -1,0 +1,61 @@
+/* Estilos globais da Lojinha da Miih.
+   Os tokens (cores, fontes) vivem no tailwind.config.mjs. Aqui ficam
+   apenas ajustes de base e utilitarios reaproveitaveis. */
+
+/* Fontes da marca (aproximacao acessivel; confirmar com o Canva).
+   Carregadas do Google Fonts. Trocar por self-host se preferir mais performance. */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=Dancing+Script:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-fundo text-texto font-corpo antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-titulo;
+  }
+
+  /* Foco visivel para navegacao por teclado (acessibilidade). */
+  :focus-visible {
+    @apply outline-none ring-2 ring-marca ring-offset-2 ring-offset-fundo;
+  }
+}
+
+@layer components {
+  /* Container central padrao, mobile-first. */
+  .container-loja {
+    @apply mx-auto w-full max-w-6xl px-4 sm:px-6;
+  }
+
+  /* Botao principal com o gradiente da marca. */
+  .btn-marca {
+    @apply inline-flex items-center justify-center gap-2 rounded-marca
+      bg-gradiente-marca px-5 py-3 font-titulo font-semibold text-fundo
+      shadow-marca transition-transform duration-200 hover:scale-[1.02]
+      focus-visible:scale-[1.02];
+  }
+
+  /* Botao secundario, contorno suave. */
+  .btn-contorno {
+    @apply inline-flex items-center justify-center gap-2 rounded-marca
+      border border-fundo-borda bg-fundo-claro px-5 py-3 font-titulo
+      font-semibold text-texto transition-colors duration-200
+      hover:border-marca hover:text-marca;
+  }
+
+  /* Etiqueta/badge generica. */
+  .etiqueta {
+    @apply inline-block rounded-full px-3 py-1 text-xs font-semibold;
+  }
+}

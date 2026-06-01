@@ -1,0 +1,63 @@
+---
+/**
+ * Rodape reaproveitavel.
+ * Mostra contato, Instagram, WhatsApp e (opcional) endereco fisico.
+ */
+import Logo from './Logo.astro';
+import { site } from '../config/site';
+import { linkWhatsApp, mensagemGeral } from '../lib/whatsapp';
+
+const anoAtual = new Date().getFullYear();
+const linkWpp = linkWhatsApp(mensagemGeral());
+---
+
+<footer class="mt-16 border-t border-fundo-borda bg-fundo-claro">
+  <div class="container-loja grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
+    <div>
+      <Logo />
+      <p class="mt-3 max-w-xs text-sm text-texto-suave">
+        {site.slogan}. {site.anosDeTradicao} anos levando beleza acessivel e de
+        verdade para todo o Brasil, direto de {site.cidade}.
+      </p>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-semibold text-texto">Navegue</h3>
+      <ul class="mt-3 space-y-2 text-sm text-texto-suave">
+        <li><a class="hover:text-marca" href="/catalogo">Catalogo</a></li>
+        <li><a class="hover:text-marca" href="/catalogo#promocoes">Promocoes</a></li>
+        <li><a class="hover:text-marca" href="/entregas-e-pagamento">Entregas e pagamento</a></li>
+        <li><a class="hover:text-marca" href="/sobre">Sobre e contato</a></li>
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="text-sm font-semibold text-texto">Contato</h3>
+      <ul class="mt-3 space-y-2 text-sm text-texto-suave">
+        <li>
+          <a class="hover:text-marca" href={site.instagramUrl} target="_blank" rel="noopener">
+            Instagram @{site.instagramUsuario}
+          </a>
+        </li>
+        <li>
+          <a class="hover:text-marca" href={linkWpp} target="_blank" rel="noopener">
+            Pedidos pelo WhatsApp
+          </a>
+        </li>
+        {site.email && (
+          <li><a class="hover:text-marca" href={`mailto:${site.email}`}>{site.email}</a></li>
+        )}
+        {site.mostrarEndereco && site.endereco && (
+          <li>{site.endereco}</li>
+        )}
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-fundo-borda">
+    <div class="container-loja flex flex-col items-center justify-between gap-2 py-4 text-xs text-texto-suave sm:flex-row">
+      <p>&copy; {anoAtual} {site.nome}. Feito com carinho em {site.cidade}.</p>
+      <p>Beleza acessivel, real e sem filtro.</p>
+    </div>
+  </div>
+</footer>

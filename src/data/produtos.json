@@ -1,0 +1,53 @@
+[
+  {
+    "id": "exemplo-001",
+    "nome": "Base Liquida (Produto de Exemplo)",
+    "marca": "Marca Exemplo",
+    "categoria": "maquiagem",
+    "descricao": "Produto de exemplo (placeholder) para validar o layout do catalogo. Substituir por um produto real, com descricao verdadeira, antes de publicar.",
+    "preco": 49.9,
+    "precoPromocional": 39.9,
+    "tom": "Bege Medio",
+    "volume": "30ml",
+    "imagens": [
+      { "src": "/images/products/placeholder-1.svg", "alt": "Imagem de exemplo de base liquida (substituir pela foto real)" }
+    ],
+    "disponibilidade": "em-estoque",
+    "destaque": true,
+    "promocao": true
+  },
+  {
+    "id": "exemplo-002",
+    "nome": "Serum Hidratante (Produto de Exemplo)",
+    "marca": "Marca Exemplo",
+    "categoria": "skincare",
+    "descricao": "Produto de exemplo (placeholder) para a secao de skincare. Substituir por um produto real antes de publicar.",
+    "preco": 79.9,
+    "precoPromocional": null,
+    "tom": null,
+    "volume": "30ml",
+    "imagens": [
+      { "src": "/images/products/placeholder-2.svg", "alt": "Imagem de exemplo de serum hidratante (substituir pela foto real)" }
+    ],
+    "disponibilidade": "em-estoque",
+    "destaque": true,
+    "promocao": false
+  },
+  {
+    "id": "exemplo-003",
+    "nome": "Kit Presente (Produto de Exemplo)",
+    "marca": "Marca Exemplo",
+    "categoria": "kits-presentes",
+    "descricao": "Kit de exemplo (placeholder) para a secao de kits e presentes. Substituir pelo kit real antes de publicar.",
+    "preco": 119.9,
+    "precoPromocional": null,
+    "tom": null,
+    "volume": null,
+    "imagens": [
+      { "src": "/images/products/placeholder-3.svg", "alt": "Imagem de exemplo de kit presente (substituir pela foto real)" }
+    ],
+    "disponibilidade": "esgotado",
+    "destaque": false,
+    "promocao": false
+  }
+]

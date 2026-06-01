@@ -1,0 +1,28 @@
+# build
+dist/
+.output/
+
+# dependencias
+node_modules/
+
+# astro
+.astro/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ambiente
+.env
+.env.production
+.env.*.local
+
+# sistema
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/

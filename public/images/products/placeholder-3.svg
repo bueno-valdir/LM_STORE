@@ -1,0 +1,13 @@
+<!-- Foto placeholder. TODO (assets reais): substituir pela foto real do produto. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="600" height="600">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5fa2"/>
+      <stop offset="1" stop-color="#ff8a4c"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="600" fill="#241a1f"/>
+  <circle cx="300" cy="250" r="90" fill="url(#g)" opacity="0.35"/>
+  <text x="300" y="330" font-family="sans-serif" font-size="34" fill="#f6eef1" text-anchor="middle">Foto do produto</text>
+  <text x="300" y="375" font-family="sans-serif" font-size="22" fill="#c8b8c0" text-anchor="middle">(placeholder)</text>
+</svg>
