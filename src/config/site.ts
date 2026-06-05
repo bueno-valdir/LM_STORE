@@ -36,9 +36,9 @@ export const site = {
    * Numero de WhatsApp no formato internacional, somente digitos.
    * Formato esperado: 55 + DDD + numero. Ex.: 5515999999999.
    *
-   * TODO (assets reais): PREENCHER com o numero real da loja.
+   * Formato: 55 (Brasil) + DDD + numero (so digitos).
    */
-  whatsapp: '5515999999999',
+  whatsapp: '5515998233455',
 
   /**
    * Exibir o endereco fisico no site?
