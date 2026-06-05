@@ -19,7 +19,7 @@ export const site = {
     'Loja em Sorocaba-SP com envio para todo o Brasil. Pedidos via WhatsApp, logo a está disponível direto via Site.',
 
   /** Anos de tradicao da loja (usado no Sobre e em destaques de confianca). */
-  anosDeTradicao: Nove,
+  anosDeTradicao: 9,
 
   /** Cidade e estado da loja. */
   cidade: 'Sorocaba-SP',
