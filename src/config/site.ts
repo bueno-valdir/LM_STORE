@@ -18,7 +18,7 @@ export const site = {
     'Maquiagem e skincare com beleza acessível, real e sem filtro. ' +
     'Loja em Sorocaba-SP com envio para todo o Brasil. Pedidos via WhatsApp, logo a está disponível direto via Site.',
 
-  /** Anos de tradição da loja (usado no Sobre e em destaques de confianca). */
+  /** Anos de tradicao da loja (usado no Sobre e em destaques de confianca). */
   anosDeTradicao: Nove,
 
   /** Cidade e estado da loja. */
