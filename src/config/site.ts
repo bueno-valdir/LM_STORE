@@ -61,6 +61,13 @@ export const site = {
 
   /** E-mail de contato (opcional). TODO (confirmar): preencher ou deixar vazio. */
   email: '',
+
+  /**
+   * Endereco do painel (PocketBase) de onde o site le os produtos.
+   * O build busca os produtos aqui. Trocar quando migrar o dominio.
+   * Deixe vazio ('') para usar os produtos de exemplo do JSON local.
+   */
+  pocketbaseUrl: 'https://painel.lmstore.veraxlegalops.com.br',
 } as const;
 
 export type SiteConfig = typeof site;
