@@ -16,10 +16,10 @@ export const site = {
   /** Descricao usada em SEO e Open Graph (preview ao compartilhar link). */
   descricao:
     'Maquiagem e skincare com beleza acessível, real e sem filtro. ' +
-    'Loja em Sorocaba-SP com envio para todo o Brasil. Pedidos pelo WhatsApp.',
+    'Loja em Sorocaba-SP com envio para todo o Brasil. Pedidos via WhatsApp, logo a está disponível direto via Site.',
 
-  /** Anos de tradicao da loja (usado no Sobre e em destaques de confianca). */
-  anosDeTradicao: 9,
+  /** Anos de tradição da loja (usado no Sobre e em destaques de confianca). */
+  anosDeTradicao: Nove,
 
   /** Cidade e estado da loja. */
   cidade: 'Sorocaba-SP',
@@ -38,7 +38,7 @@ export const site = {
    *
    * Formato: 55 (Brasil) + DDD + numero (so digitos).
    */
-  whatsapp: '5515998233455',
+  whatsapp: '5515998234551',
 
   /**
    * Exibir o endereco fisico no site?
@@ -46,8 +46,8 @@ export const site = {
    *
    * TODO (confirmar): SIM ou NAO. Se SIM, preencher `endereco`.
    */
-  mostrarEndereco: false,
-  endereco: '', // TODO (assets reais): preencher se mostrarEndereco = true
+  mostrarEndereco: true,
+  endereco: 'R. Rudnei Schonfelder, 291 - Jardim Guaiba - Sorocaba/SP', // TODO (assets reais): preencher se mostrarEndereco = true
 
   /**
    * Mostrar precos no catalogo (true) ou pedir para consultar no WhatsApp (false)?
@@ -60,7 +60,7 @@ export const site = {
   instagramUrl: 'https://instagram.com/lojinhadamiih_',
 
   /** E-mail de contato (opcional). TODO (confirmar): preencher ou deixar vazio. */
-  email: '',
+  email: 'contato.lojinhadamiih@gmail.com',
 
   /**
    * Endereco do painel (PocketBase) de onde o site le os produtos.
