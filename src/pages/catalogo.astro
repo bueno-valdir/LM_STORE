@@ -8,14 +8,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  titulo="Catalogo"
-  descricao="Veja toda a maquiagem e skincare da Lojinha da Miih e peca pelo WhatsApp."
+  titulo="Catálogo"
+  descricao="Veja toda a maquiagem e skincare da Lojinha da Miih e peça pelo WhatsApp."
 >
   <section class="container-loja py-10">
     <header class="mb-6">
-      <h1 class="font-titulo text-3xl font-bold text-texto">Catalogo</h1>
+      <h1 class="font-titulo text-3xl font-bold text-texto">Catálogo</h1>
       <p class="mt-1 text-texto-suave">
-        Filtre por categoria ou veja as promocoes. Toque no produto para ver os detalhes.
+        Filtre por categoria ou veja as promoções. Toque no produto para ver os detalhes.
       </p>
     </header>
 
@@ -31,7 +31,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       Nenhum produto por aqui ainda. Volte em breve.
     </p>
     <p id="erro" class="hidden py-10 text-center text-texto-suave">
-      Nao foi possivel carregar os produtos agora. Tente atualizar a pagina.
+      Não foi possível carregar os produtos agora. Tente atualizar a página.
     </p>
   </section>
 </BaseLayout>
@@ -59,7 +59,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     const filtros = [
       { valor: 'todos', rotulo: 'Todos' },
       ...categorias.map((c) => ({ valor: c, rotulo: rotuloCategoria(c) })),
-      ...(temPromo ? [{ valor: 'promocao', rotulo: 'Promocoes' }] : []),
+      ...(temPromo ? [{ valor: 'promocao', rotulo: 'Promoções' }] : []),
     ];
 
     barra.innerHTML = filtros

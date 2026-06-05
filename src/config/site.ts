@@ -15,7 +15,7 @@ export const site = {
 
   /** Descricao usada em SEO e Open Graph (preview ao compartilhar link). */
   descricao:
-    'Maquiagem e skincare com beleza acessivel, real e sem filtro. ' +
+    'Maquiagem e skincare com beleza acessível, real e sem filtro. ' +
     'Loja em Sorocaba-SP com envio para todo o Brasil. Pedidos pelo WhatsApp.',
 
   /** Anos de tradicao da loja (usado no Sobre e em destaques de confianca). */

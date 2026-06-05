@@ -21,18 +21,18 @@ import { withBase } from '../lib/url';
     <div class="container-loja grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
       <div>
         <span class="etiqueta bg-marca/10 text-marca-escuro">
-          {site.anosDeTradicao} anos de tradicao
+          {site.anosDeTradicao} anos de tradição
         </span>
         <h1 class="mt-4 font-titulo text-4xl font-bold leading-tight text-texto sm:text-5xl">
-          Beleza acessivel,
+          Beleza acessível,
           <span class="bg-gradiente-marca bg-clip-text text-transparent">real e sem filtro</span>
         </h1>
         <p class="mt-4 max-w-md text-texto-suave">
           {site.slogan}. Maquiagem e skincare selecionados com carinho em
-          {site.cidade}, com envio para todo o Brasil e pedido facil pelo WhatsApp.
+          {site.cidade}, com envio para todo o Brasil e pedido fácil pelo WhatsApp.
         </p>
         <div class="mt-6 flex flex-wrap gap-3">
-          <a href={withBase('/catalogo')} class="btn-marca">Ver catalogo</a>
+          <a href={withBase('/catalogo')} class="btn-marca">Ver catálogo</a>
           <WhatsAppButton variante="contorno" rotulo="Falar no WhatsApp" />
         </div>
       </div>
@@ -59,13 +59,13 @@ import { withBase } from '../lib/url';
   <section id="faixa-promo" class="hidden bg-gradiente-marca">
     <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-white">
       <p class="font-titulo font-semibold">
-        Promocoes da semana com precinho que cabe no bolso
+        Promoções da semana com precinho que cabe no bolso
       </p>
       <a
         href={withBase('/catalogo#promocoes')}
         class="rounded-marca bg-white px-4 py-2 text-sm font-semibold text-preto transition-transform hover:scale-[1.02]"
       >
-        Ver promocoes
+        Ver promoções
       </a>
     </div>
   </section>
@@ -75,7 +75,7 @@ import { withBase } from '../lib/url';
     <div class="mb-6 flex items-end justify-between">
       <div>
         <h2 class="font-titulo text-2xl font-bold text-texto">Destaques</h2>
-        <p class="text-sm text-texto-suave">Queridinhos selecionados pra voce.</p>
+        <p class="text-sm text-texto-suave">Queridinhos selecionados pra você.</p>
       </div>
       <a href={withBase('/catalogo')} class="text-sm font-medium text-marca-escuro hover:underline">Ver tudo</a>
     </div>
@@ -113,7 +113,7 @@ import { withBase } from '../lib/url';
     <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-8 text-center">
       <h2 class="font-titulo text-2xl font-bold text-texto">Ficou com vontade?</h2>
       <p class="mx-auto mt-2 max-w-md text-texto-suave">
-        Escolha seus produtos e finalize o pedido pelo WhatsApp, rapidinho e sem complicacao.
+        Escolha seus produtos e finalize o pedido pelo WhatsApp, rapidinho e sem complicação.
       </p>
       <div class="mt-5 flex justify-center">
         <WhatsAppButton rotulo="Fazer meu pedido" />

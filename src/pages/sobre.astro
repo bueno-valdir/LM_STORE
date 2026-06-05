@@ -10,20 +10,20 @@ import { site } from '../config/site';
 
 <BaseLayout
   titulo="Sobre e contato"
-  descricao="Conheca a Lojinha da Miih e fale com a gente pelo Instagram ou WhatsApp."
+  descricao="Conheça a Lojinha da Miih e fale com a gente pelo Instagram ou WhatsApp."
 >
   <section class="container-loja py-10">
     <div class="grid gap-10 md:grid-cols-2">
       <div>
         <h1 class="font-titulo text-3xl font-bold text-texto">Sobre a {site.nome}</h1>
         <p class="mt-4 leading-relaxed text-texto-suave">
-          A {site.nome} nasceu da paixao por beleza acessivel, real e sem filtro.
-          Sao {site.anosDeTradicao} anos de tradicao levando maquiagem e skincare
-          que cabem no bolso, com aquele atendimento proximo e caloroso, direto de
+          A {site.nome} nasceu da paixão por beleza acessível, real e sem filtro.
+          São {site.anosDeTradicao} anos de tradição levando maquiagem e skincare
+          que cabem no bolso, com aquele atendimento próximo e caloroso, direto de
           {site.cidade} para todo o Brasil.
         </p>
         <p class="mt-4 leading-relaxed text-texto-suave">
-          Aqui a ideia e simples: produto bom, preco honesto e papo reto. Voce
+          Aqui a ideia é simples: produto bom, preço honesto e papo reto. Você
           escolhe, a gente conversa pelo WhatsApp e cuida do resto.
         </p>
         <!-- TODO (assets reais): ajustar o texto da marca com a historia real da loja. -->
@@ -39,7 +39,7 @@ import { site } from '../config/site';
             </a>
           </li>
           <li>
-            <span class="font-semibold text-texto">WhatsApp:</span> pedidos e duvidas no botao abaixo.
+            <span class="font-semibold text-texto">WhatsApp:</span> pedidos e dúvidas no botão abaixo.
           </li>
           {site.email && (
             <li>
@@ -50,7 +50,7 @@ import { site } from '../config/site';
           {
             site.mostrarEndereco && site.endereco && (
               <li>
-                <span class="font-semibold text-texto">Endereco:</span> {site.endereco}
+                <span class="font-semibold text-texto">Endereço:</span> {site.endereco}
               </li>
             )
           }

@@ -10,8 +10,8 @@ import { withBase } from '../lib/url';
 
 <BaseLayout titulo="Produto" descricao="Detalhes do produto na Lojinha da Miih.">
   <article class="container-loja py-8">
-    <nav class="mb-4 text-sm text-texto-suave" aria-label="Voce esta em">
-      <a href={withBase('/catalogo')} class="hover:text-marca">Catalogo</a>
+    <nav class="mb-4 text-sm text-texto-suave" aria-label="Você está em">
+      <a href={withBase('/catalogo')} class="hover:text-marca">Catálogo</a>
       <span aria-hidden="true"> / </span>
       <span id="trilha-nome" class="text-texto">Produto</span>
     </nav>
@@ -20,7 +20,7 @@ import { withBase } from '../lib/url';
 
     <p id="carregando" class="py-10 text-center text-texto-suave">Carregando produto...</p>
     <p id="nao-encontrado" class="hidden py-10 text-center text-texto-suave">
-      Produto nao encontrado. <a class="text-marca-escuro hover:underline" href={withBase('/catalogo')}>Voltar ao catalogo</a>.
+      Produto não encontrado. <a class="text-marca-escuro hover:underline" href={withBase('/catalogo')}>Voltar ao catálogo</a>.
     </p>
   </article>
 </BaseLayout>
@@ -87,7 +87,7 @@ import { withBase } from '../lib/url';
           <h1 class="mt-1 font-titulo text-3xl font-bold text-texto">${esc(p.nome)}</h1>
 
           <div class="mt-3 flex flex-wrap gap-2">
-            ${promo ? '<span class="etiqueta bg-marca text-white">Promocao</span>' : ''}
+            ${promo ? '<span class="etiqueta bg-marca text-white">Promoção</span>' : ''}
             <span class="etiqueta ${esgotado ? 'bg-fundo-claro text-texto-suave' : 'bg-marca/10 text-marca-escuro'}">${esgotado ? 'Esgotado' : 'Em estoque'}</span>
           </div>
 
@@ -101,7 +101,7 @@ import { withBase } from '../lib/url';
             <a href="${esc(linkWhatsApp(p))}" target="_blank" rel="noopener" class="btn-marca">
               ${esgotado ? 'Avise-me / Pedir mesmo assim' : 'Pedir no WhatsApp'}
             </a>
-            <p class="mt-2 text-xs text-texto-suave">Voce sera levada ao WhatsApp com a mensagem do produto ja preenchida.</p>
+            <p class="mt-2 text-xs text-texto-suave">Você será levada ao WhatsApp com a mensagem do produto já preenchida.</p>
           </div>
         </section>
       </div>`;

@@ -115,7 +115,7 @@ export function precoVigente(p: ProdutoView) {
 
 /** Monta o link wa.me com a mensagem do produto. */
 export function linkWhatsApp(p: ProdutoView): string {
-  const partes = [`Ola! Tenho interesse no produto: ${p.nome} (${p.id})`];
+  const partes = [`Olá! Tenho interesse no produto: ${p.nome} (${p.id})`];
   if (p.tom) partes.push(`, tom ${p.tom}`);
   const { atual } = precoVigente(p);
   const precoFmt = formatarPreco(atual);
@@ -133,7 +133,7 @@ export function cardHTML(p: ProdutoView): string {
 
   const etiquetas = `
     <div class="absolute left-2 top-2 flex flex-col gap-1">
-      ${promo ? '<span class="etiqueta bg-marca text-white">Promocao</span>' : ''}
+      ${promo ? '<span class="etiqueta bg-marca text-white">Promoção</span>' : ''}
       ${esgotado ? '<span class="etiqueta bg-preto/80 text-white">Esgotado</span>' : ''}
     </div>`;
 

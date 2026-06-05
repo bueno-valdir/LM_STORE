@@ -7,9 +7,9 @@ import Logo from './Logo.astro';
 import { withBase } from '../lib/url';
 
 const linksNav = [
-  { href: '/', rotulo: 'Inicio' },
-  { href: '/catalogo', rotulo: 'Catalogo' },
-  { href: '/catalogo#promocoes', rotulo: 'Promocoes' },
+  { href: '/', rotulo: 'Início' },
+  { href: '/catalogo', rotulo: 'Catálogo' },
+  { href: '/catalogo#promocoes', rotulo: 'Promoções' },
   { href: '/entregas-e-pagamento', rotulo: 'Entregas' },
   { href: '/sobre', rotulo: 'Sobre' },
 ];
@@ -22,7 +22,7 @@ const linksNav = [
     </a>
 
     <!-- Navegacao no desktop. -->
-    <nav class="hidden items-center gap-6 md:flex" aria-label="Navegacao principal">
+    <nav class="hidden items-center gap-6 md:flex" aria-label="Navegação principal">
       {
         linksNav.map((link) => (
           <a
@@ -47,7 +47,7 @@ const linksNav = [
       </summary>
       <nav
         class="absolute right-0 mt-2 w-48 rounded-marca border border-white/10 bg-preto-claro p-2 shadow-marca"
-        aria-label="Navegacao principal"
+        aria-label="Navegação principal"
       >
         {
           linksNav.map((link) => (

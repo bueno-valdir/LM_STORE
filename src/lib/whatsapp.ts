@@ -10,11 +10,11 @@ import { precoVigente, formatarPreco } from './produtos';
 
 /**
  * Monta a mensagem de interesse em um produto.
- * Exemplo: "Ola! Tenho interesse no produto: Base Liquida (exemplo-001), tom Bege Medio - R$ 39,90".
+ * Exemplo: "Olá! Tenho interesse no produto: Base Liquida (exemplo-001), tom Bege Medio - R$ 39,90".
  */
 export function mensagemProduto(produto: Produto): string {
   const partes: string[] = [];
-  partes.push(`Ola! Tenho interesse no produto: ${produto.nome} (${produto.id})`);
+  partes.push(`Olá! Tenho interesse no produto: ${produto.nome} (${produto.id})`);
 
   if (produto.tom) {
     partes.push(`, tom ${produto.tom}`);
@@ -31,7 +31,7 @@ export function mensagemProduto(produto: Produto): string {
 
 /** Mensagem generica para o botao de contato (sem produto especifico). */
 export function mensagemGeral(): string {
-  return `Ola! Vim pelo site da ${site.nome} e gostaria de tirar uma duvida.`;
+  return `Olá! Vim pelo site da ${site.nome} e gostaria de tirar uma dúvida.`;
 }
 
 /** Gera o link wa.me com a mensagem ja codificada para URL. */
