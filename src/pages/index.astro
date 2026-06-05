@@ -3,14 +3,9 @@
  * Home: hero com a identidade da marca, destaques, faixa de promocao e CTA.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ProductCard from '../components/ProductCard.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { site } from '../config/site';
-import { listarDestaques, listarPromocoes } from '../lib/produtos';
 import { withBase } from '../lib/url';
-
-const destaques = listarDestaques();
-const promocoes = listarPromocoes();
 ---
 
 <BaseLayout>
@@ -60,26 +55,22 @@ const promocoes = listarPromocoes();
     </div>
   </section>
 
-  <!-- FAIXA DE PROMOCAO -->
-  {
-    promocoes.length > 0 && (
-      <section class="bg-gradiente-marca">
-        <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-white">
-          <p class="font-titulo font-semibold">
-            Promocoes da semana com precinho que cabe no bolso
-          </p>
-          <a
-            href={withBase('/catalogo#promocoes')}
-            class="rounded-marca bg-white px-4 py-2 text-sm font-semibold text-preto transition-transform hover:scale-[1.02]"
-          >
-            Ver promocoes
-          </a>
-        </div>
-      </section>
-    )
-  }
+  <!-- FAIXA DE PROMOCAO (mostrada pelo navegador se houver promocoes). -->
+  <section id="faixa-promo" class="hidden bg-gradiente-marca">
+    <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-white">
+      <p class="font-titulo font-semibold">
+        Promocoes da semana com precinho que cabe no bolso
+      </p>
+      <a
+        href={withBase('/catalogo#promocoes')}
+        class="rounded-marca bg-white px-4 py-2 text-sm font-semibold text-preto transition-transform hover:scale-[1.02]"
+      >
+        Ver promocoes
+      </a>
+    </div>
+  </section>
 
-  <!-- DESTAQUES -->
+  <!-- DESTAQUES (preenchidos pelo navegador). -->
   <section class="container-loja py-12">
     <div class="mb-6 flex items-end justify-between">
       <div>
@@ -89,18 +80,33 @@ const promocoes = listarPromocoes();
       <a href={withBase('/catalogo')} class="text-sm font-medium text-marca-escuro hover:underline">Ver tudo</a>
     </div>
 
-    {
-      destaques.length > 0 ? (
-        <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {destaques.map((produto) => (
-            <ProductCard produto={produto} />
-          ))}
-        </div>
-      ) : (
-        <p class="text-texto-suave">Em breve, novos destaques por aqui.</p>
-      )
-    }
+    <div id="destaques-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"></div>
+    <p id="destaques-vazio" class="hidden text-texto-suave">Em breve, novos destaques por aqui.</p>
   </section>
+
+  <script>
+    import { carregarProdutos, cardHTML } from '../lib/clienteProdutos';
+
+    const grid = document.getElementById('destaques-grid');
+    const vazio = document.getElementById('destaques-vazio');
+    const faixa = document.getElementById('faixa-promo');
+
+    carregarProdutos()
+      .then((produtos) => {
+        if (faixa && produtos.some((p) => p.promocao)) faixa.classList.remove('hidden');
+
+        const destaques = produtos.filter((p) => p.destaque);
+        if (grid && destaques.length) {
+          grid.innerHTML = destaques.map(cardHTML).join('');
+        } else {
+          vazio?.classList.remove('hidden');
+        }
+      })
+      .catch((e) => {
+        console.error('[home] erro ao carregar destaques:', e);
+        vazio?.classList.remove('hidden');
+      });
+  </script>
 
   <!-- CTA FINAL -->
   <section class="container-loja pb-12">

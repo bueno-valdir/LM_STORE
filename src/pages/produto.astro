@@ -1,0 +1,138 @@
+---
+/**
+ * Pagina de detalhe do produto.
+ * Le o produto do painel (PocketBase) pelo navegador, a partir do ?id= da URL.
+ * Ex.: /produto?id=vpx9rjpdmkfomk2
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { withBase } from '../lib/url';
+---
+
+<BaseLayout titulo="Produto" descricao="Detalhes do produto na Lojinha da Miih.">
+  <article class="container-loja py-8">
+    <nav class="mb-4 text-sm text-texto-suave" aria-label="Voce esta em">
+      <a href={withBase('/catalogo')} class="hover:text-marca">Catalogo</a>
+      <span aria-hidden="true"> / </span>
+      <span id="trilha-nome" class="text-texto">Produto</span>
+    </nav>
+
+    <div id="detalhe"></div>
+
+    <p id="carregando" class="py-10 text-center text-texto-suave">Carregando produto...</p>
+    <p id="nao-encontrado" class="hidden py-10 text-center text-texto-suave">
+      Produto nao encontrado. <a class="text-marca-escuro hover:underline" href={withBase('/catalogo')}>Voltar ao catalogo</a>.
+    </p>
+  </article>
+</BaseLayout>
+
+<script>
+  import {
+    carregarProduto,
+    precoVigente,
+    formatarPreco,
+    rotuloCategoria,
+    linkWhatsApp,
+    esc,
+    type ProdutoView,
+  } from '../lib/clienteProdutos';
+
+  const detalhe = document.getElementById('detalhe')!;
+  const carregando = document.getElementById('carregando');
+  const naoEncontrado = document.getElementById('nao-encontrado');
+  const trilhaNome = document.getElementById('trilha-nome');
+
+  function render(p: ProdutoView) {
+    const { atual, de, promo } = precoVigente(p);
+    const atualFmt = formatarPreco(atual);
+    const deFmt = formatarPreco(de);
+    const esgotado = !p.disponivel;
+    const capa = p.imagens[0];
+
+    if (trilhaNome) trilhaNome.textContent = p.nome;
+    document.title = `${p.nome} | Lojinha da Miih`;
+
+    const miniaturas =
+      p.imagens.length > 1
+        ? `<div class="mt-3 grid grid-cols-4 gap-2">${p.imagens
+            .map(
+              (img, i) =>
+                `<button type="button" class="miniatura overflow-hidden rounded-lg border border-fundo-borda bg-fundo-claro focus-visible:border-marca" data-src="${esc(img.src)}" data-alt="${esc(img.alt)}" aria-label="Ver imagem ${i + 1}"><img src="${esc(img.src)}" alt="${esc(img.alt)}" width="160" height="160" loading="lazy" decoding="async" class="aspect-square w-full object-cover" /></button>`,
+            )
+            .join('')}</div>`
+        : '';
+
+    const precoBloco = atualFmt
+      ? `<div class="flex items-baseline gap-3">
+           <span class="font-titulo text-3xl font-bold text-marca">${atualFmt}</span>
+           ${promo && deFmt ? `<span class="text-lg text-texto-suave line-through">${deFmt}</span>` : ''}
+         </div>`
+      : '<span class="text-lg font-medium text-texto-suave">Consulte o valor no WhatsApp</span>';
+
+    const atributos = [
+      p.tom ? `<div class="flex gap-2"><dt class="font-semibold text-texto">Tom:</dt><dd>${esc(p.tom)}</dd></div>` : '',
+      p.volume ? `<div class="flex gap-2"><dt class="font-semibold text-texto">Volume:</dt><dd>${esc(p.volume)}</dd></div>` : '',
+    ].join('');
+
+    detalhe.innerHTML = `
+      <div class="grid gap-8 md:grid-cols-2">
+        <section>
+          <div class="overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro">
+            <img id="imagem-principal" src="${esc(capa.src)}" alt="${esc(capa.alt)}" width="800" height="800" loading="eager" decoding="async" class="aspect-square w-full object-cover" />
+          </div>
+          ${miniaturas}
+        </section>
+
+        <section>
+          <span class="text-xs uppercase tracking-wide text-texto-suave">${esc(p.marca)} &middot; ${esc(rotuloCategoria(p.categoria))}</span>
+          <h1 class="mt-1 font-titulo text-3xl font-bold text-texto">${esc(p.nome)}</h1>
+
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${promo ? '<span class="etiqueta bg-marca text-white">Promocao</span>' : ''}
+            <span class="etiqueta ${esgotado ? 'bg-fundo-claro text-texto-suave' : 'bg-marca/10 text-marca-escuro'}">${esgotado ? 'Esgotado' : 'Em estoque'}</span>
+          </div>
+
+          <div class="mt-5">${precoBloco}</div>
+
+          <dl class="mt-4 space-y-1 text-sm text-texto-suave">${atributos}</dl>
+
+          <p class="mt-5 leading-relaxed text-texto-suave">${esc(p.descricao)}</p>
+
+          <div class="mt-6">
+            <a href="${esc(linkWhatsApp(p))}" target="_blank" rel="noopener" class="btn-marca">
+              ${esgotado ? 'Avise-me / Pedir mesmo assim' : 'Pedir no WhatsApp'}
+            </a>
+            <p class="mt-2 text-xs text-texto-suave">Voce sera levada ao WhatsApp com a mensagem do produto ja preenchida.</p>
+          </div>
+        </section>
+      </div>`;
+
+    // Troca a imagem principal ao clicar numa miniatura.
+    const principal = document.getElementById('imagem-principal') as HTMLImageElement | null;
+    detalhe.querySelectorAll<HTMLButtonElement>('.miniatura').forEach((botao) => {
+      botao.addEventListener('click', () => {
+        if (!principal) return;
+        principal.src = botao.dataset.src ?? principal.src;
+        principal.alt = botao.dataset.alt ?? principal.alt;
+      });
+    });
+  }
+
+  async function iniciar() {
+    const id = new URLSearchParams(location.search).get('id') ?? '';
+    try {
+      const produto = id ? await carregarProduto(id) : null;
+      carregando?.classList.add('hidden');
+      if (!produto) {
+        naoEncontrado?.classList.remove('hidden');
+        return;
+      }
+      render(produto);
+    } catch (e) {
+      console.error('[produto] erro ao carregar:', e);
+      carregando?.classList.add('hidden');
+      naoEncontrado?.classList.remove('hidden');
+    }
+  }
+
+  iniciar();
+</script>
