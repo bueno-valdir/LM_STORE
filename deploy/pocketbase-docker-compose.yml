@@ -1,0 +1,49 @@
+# PocketBase: backend do admin (banco + login + upload de imagens + painel).
+# Roda como container no VPS, atras do Traefik que ja existe (do n8n).
+# Nao mexe em n8n, ativobp nem no site lmstore.
+#
+# O que ele entrega:
+#   - Painel de administracao em /_/ (cadastro de produtos e fotos, com login)
+#   - API de leitura dos produtos (o site consome para montar o catalogo)
+#   - Armazenamento das imagens
+#
+# Seguranca:
+#   - HTTPS automatico pelo Traefik (mesmo certresolver do n8n).
+#   - O painel /_/ exige login de administrador (criado no primeiro acesso).
+#   - Os dados ficam no volume ./pb_data (persistente).
+#
+# Dominio do painel (provisorio, troca quando migrar o dominio):
+#   painel.lmstore.veraxlegalops.com.br  -> precisa de um registro A no
+#   Cloudflare apontando para o IP do VPS (DNS only / nuvem cinza), igual ao n8n.
+#
+# Subir:  docker compose -f pocketbase-docker-compose.yml up -d
+
+networks:
+  traefik:
+    external: true
+    name: n8n_default
+
+services:
+  pocketbase:
+    image: ghcr.io/muchobien/pocketbase:latest
+    container_name: lmstore-pocketbase
+    restart: unless-stopped
+    volumes:
+      # Banco de dados e imagens ficam aqui (persistente no host).
+      - /docker/lmstore-pocketbase/pb_data:/pb_data
+    networks:
+      - traefik
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=n8n_default
+      # Roteador HTTPS do painel/API.
+      - traefik.http.routers.lmpb.rule=Host(`painel.lmstore.veraxlegalops.com.br`)
+      - traefik.http.routers.lmpb.entrypoints=websecure
+      - traefik.http.routers.lmpb.tls=true
+      - traefik.http.routers.lmpb.tls.certresolver=mytlschallenge
+      - traefik.http.services.lmpb.loadbalancer.server.port=8090
+      # Redireciona HTTP para HTTPS.
+      - traefik.http.routers.lmpb-http.rule=Host(`painel.lmstore.veraxlegalops.com.br`)
+      - traefik.http.routers.lmpb-http.entrypoints=web
+      - traefik.http.routers.lmpb-http.middlewares=lmpb-redirect
+      - traefik.http.middlewares.lmpb-redirect.redirectscheme.scheme=https

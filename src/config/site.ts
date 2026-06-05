@@ -25,6 +25,14 @@ export const site = {
   cidade: 'Sorocaba-SP',
 
   /**
+   * Fase de desenvolvimento.
+   * Quando true, o site pede aos buscadores para NAO indexar (noindex), para
+   * o site em construcao nao aparecer no Google. Trocar para false ao publicar
+   * a versao final (ja com produtos reais).
+   */
+  emDesenvolvimento: true,
+
+  /**
    * Numero de WhatsApp no formato internacional, somente digitos.
    * Formato esperado: 55 + DDD + numero. Ex.: 5515999999999.
    *

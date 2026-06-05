@@ -44,6 +44,9 @@ const imagemOgAbsoluta = new URL(imagemOg, Astro.site);
     <meta name="description" content={descricao} />
     <link rel="canonical" href={urlCanonica} />
 
+    {/* Em desenvolvimento: pede para os buscadores nao indexarem o site. */}
+    {site.emDesenvolvimento && <meta name="robots" content="noindex, nofollow" />}
+
     <!-- Open Graph (preview ao compartilhar no Instagram/WhatsApp/Linktree). -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={site.nome} />
