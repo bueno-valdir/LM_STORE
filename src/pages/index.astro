@@ -4,6 +4,7 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
+import Selos from '../components/Selos.astro';
 import { site } from '../config/site';
 import { withBase } from '../lib/url';
 ---
@@ -54,6 +55,9 @@ import { withBase } from '../lib/url';
       </div>
     </div>
   </section>
+
+  <!-- SELOS DE CONFIANCA -->
+  <Selos />
 
   <!-- FAIXA DE PROMOCAO (mostrada pelo navegador se houver promocoes). -->
   <section id="faixa-promo" class="hidden bg-gradiente-marca">

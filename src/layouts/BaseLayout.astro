@@ -4,8 +4,10 @@
  * Centraliza <head> (SEO + Open Graph), Header e Footer reaproveitaveis.
  */
 import '../styles/global.css';
+import BarraAviso from '../components/BarraAviso.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import FloatingWhatsApp from '../components/FloatingWhatsApp.astro';
 import { site } from '../config/site';
 import { withBase } from '../lib/url';
 
@@ -65,10 +67,12 @@ const imagemOgAbsoluta = new URL(imagemOg, Astro.site);
     <meta name="theme-color" content="#0e0e0f" />
   </head>
   <body class="flex min-h-screen flex-col">
+    <BarraAviso />
     <Header />
     <main class="flex-1">
       <slot />
     </main>
     <Footer />
+    <FloatingWhatsApp />
   </body>
 </html>

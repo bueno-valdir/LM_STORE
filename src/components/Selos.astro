@@ -1,0 +1,54 @@
+---
+/**
+ * Faixa de selos de confianca (envio, pagamento, atendimento, tradicao).
+ * Mensagens honestas com a realidade atual da loja (sem checkout/frete online).
+ */
+import { site } from '../config/site';
+
+const selos = [
+  {
+    titulo: 'Envio para todo o Brasil',
+    sub: `Direto de ${site.cidade}`,
+    // caminhao
+    path: 'M3 7h11v8H3zM14 10h4l3 3v2h-7zM7 19a2 2 0 100-4 2 2 0 000 4zM18 19a2 2 0 100-4 2 2 0 000 4z',
+  },
+  {
+    titulo: 'Pedido pelo WhatsApp',
+    sub: 'Rápido e sem complicação',
+    // balao de conversa
+    path: 'M4 5h16v11H8l-4 4z',
+  },
+  {
+    titulo: 'Pagamento combinado',
+    sub: 'Pix e outras formas',
+    // cartao
+    path: 'M3 6h18v12H3zM3 10h18',
+  },
+  {
+    titulo: `${site.anosDeTradicao} anos de tradição`,
+    sub: 'Confiança de verdade',
+    // estrela
+    path: 'M12 3l2.7 5.5 6 .9-4.3 4.2 1 6L12 17.8 6.6 19.6l1-6L3.3 9.4l6-.9z',
+  },
+];
+---
+
+<section class="border-y border-fundo-borda bg-fundo-claro">
+  <div class="container-loja grid grid-cols-2 gap-5 py-6 md:grid-cols-4">
+    {
+      selos.map((s) => (
+        <div class="flex items-center gap-3">
+          <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-marca/10 text-marca-escuro">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d={s.path} />
+            </svg>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-texto">{s.titulo}</p>
+            <p class="text-xs text-texto-suave">{s.sub}</p>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>

@@ -1,0 +1,13 @@
+---
+/**
+ * Barra de aviso no topo do site (acima do header).
+ * Texto configuravel em src/config/site.ts (barraAviso).
+ */
+import { site } from '../config/site';
+---
+
+<div class="bg-gradiente-marca text-white">
+  <div class="container-loja py-2 text-center text-xs font-medium sm:text-sm">
+    {site.barraAviso}
+  </div>
+</div>

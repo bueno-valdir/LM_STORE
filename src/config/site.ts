@@ -13,6 +13,9 @@ export const site = {
   /** Frase curta de posicionamento (aparece no hero e em metatags). */
   slogan: 'Make e skincare que cabem no bolso',
 
+  /** Texto da barra de aviso no topo do site (edite a vontade). */
+  barraAviso: 'Envio para todo o Brasil • Pedido fácil pelo WhatsApp • 9 anos de tradição',
+
   /** Descricao usada em SEO e Open Graph (preview ao compartilhar link). */
   descricao:
     'Maquiagem e skincare com beleza acessível, real e sem filtro. ' +
