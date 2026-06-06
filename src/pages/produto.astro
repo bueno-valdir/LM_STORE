@@ -32,6 +32,7 @@ import { withBase } from '../lib/url';
     formatarPreco,
     rotuloCategoria,
     linkWhatsApp,
+    textoSimples,
     esc,
     type ProdutoView,
   } from '../lib/clienteProdutos';
@@ -95,7 +96,7 @@ import { withBase } from '../lib/url';
 
           <dl class="mt-4 space-y-1 text-sm text-texto-suave">${atributos}</dl>
 
-          <p class="mt-5 leading-relaxed text-texto-suave">${esc(p.descricao)}</p>
+          <p class="mt-5 whitespace-pre-line leading-relaxed text-texto-suave">${esc(textoSimples(p.descricao))}</p>
 
           <div class="mt-6">
             <a href="${esc(linkWhatsApp(p))}" target="_blank" rel="noopener" class="btn-marca">

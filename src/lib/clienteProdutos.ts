@@ -50,6 +50,21 @@ export function esc(s: string): string {
   );
 }
 
+/**
+ * Converte o HTML da descricao (campo do painel pode vir com <p>, <br>, etc.)
+ * em texto simples, preservando quebras de linha. Remove qualquer tag, o que
+ * tambem evita injecao de HTML/script vindo do conteudo.
+ */
+export function textoSimples(html: string): string {
+  return (html || '')
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 /** Mapeia um registro do PocketBase para o formato das telas. */
 function mapear(rec: any): ProdutoView {
   const arquivos: string[] = Array.isArray(rec.imagens)
