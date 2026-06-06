@@ -1,13 +1,13 @@
-# Publica o site no GitHub Pages automaticamente a cada push.
+# Publica a PREVIA no GitHub Pages a cada push na branch "dev".
 # Builda o site (Astro) e envia o resultado para a branch "gh-pages",
-# que o GitHub Pages serve. Metodo robusto, sem depender de protecao de ambiente.
-name: Publicar no GitHub Pages
+# que o GitHub Pages serve. Serve como ambiente de previa/homologacao.
+name: Publicar previa (GitHub Pages)
 
 on:
-  # Roda quando houver push na branch de desenvolvimento atual.
+  # Roda quando houver push na branch de desenvolvimento (previa).
   push:
     branches:
-      - claude/fervent-allen-VGls2
+      - dev
   # Permite acionar manualmente pelo botao "Run workflow" na aba Actions.
   workflow_dispatch:
 
