@@ -123,6 +123,43 @@ export function linkWhatsApp(p: ProdutoView): string {
   return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(partes.join(''))}`;
 }
 
+/**
+ * HTML de um carrossel de produtos (titulo + setas + trilha rolavel).
+ * As setas sao ligadas depois pelo script da pagina (.carrossel-prev/next).
+ */
+export function carrosselHTML(
+  titulo: string,
+  sub: string,
+  verTudoHref: string,
+  produtos: ProdutoView[],
+): string {
+  if (!produtos.length) return '';
+  const cards = produtos
+    .map(
+      (p) =>
+        `<div class="min-w-[46%] snap-start sm:min-w-[31%] lg:min-w-[23%]">${cardHTML(p)}</div>`,
+    )
+    .join('');
+  const seta = (dir: 'prev' | 'next', rotulo: string, ch: string) =>
+    `<button type="button" class="carrossel-${dir} grid h-9 w-9 place-items-center rounded-full border border-fundo-borda text-texto transition-colors hover:border-marca hover:text-marca" aria-label="${rotulo}">${ch}</button>`;
+
+  return `
+  <section class="container-loja py-8">
+    <div class="mb-5 flex items-end justify-between gap-4">
+      <div>
+        <h2 class="font-titulo text-2xl font-bold text-texto">${esc(titulo)}</h2>
+        ${sub ? `<p class="text-sm text-texto-suave">${esc(sub)}</p>` : ''}
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="${esc(verTudoHref)}" class="hidden text-sm font-medium text-marca-escuro hover:underline sm:inline">Ver tudo</a>
+        ${seta('prev', 'Anterior', '&lsaquo;')}
+        ${seta('next', 'Próximo', '&rsaquo;')}
+      </div>
+    </div>
+    <div class="carrossel-track flex snap-x gap-4 overflow-x-auto scroll-smooth pb-2">${cards}</div>
+  </section>`;
+}
+
 /** HTML de um card de produto (catalogo e destaques). */
 export function cardHTML(p: ProdutoView): string {
   const { atual, de, promo } = precoVigente(p);

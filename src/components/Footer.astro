@@ -1,7 +1,7 @@
 ---
 /**
- * Rodape reaproveitavel.
- * Mostra contato, Instagram, WhatsApp e (opcional) endereco fisico.
+ * Rodape completo: marca, navegacao, atendimento e informacoes de compra.
+ * Preto com texto branco e acentos em rosa. Mensagens honestas (sem checkout).
  */
 import Logo from './Logo.astro';
 import { site } from '../config/site';
@@ -13,15 +13,28 @@ const linkWpp = linkWhatsApp(mensagemGeral());
 ---
 
 <footer class="mt-16 bg-preto text-white">
-  <div class="container-loja grid gap-8 py-10 sm:grid-cols-2 lg:grid-cols-3">
+  <div class="container-loja grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Marca -->
     <div>
       <Logo />
       <p class="mt-3 max-w-xs text-sm text-white/60">
         {site.slogan}. {site.anosDeTradicao} anos levando beleza acessível e de
         verdade para todo o Brasil, direto de {site.cidade}.
       </p>
+      <a
+        href={site.instagramUrl}
+        target="_blank"
+        rel="noopener"
+        class="mt-4 inline-flex items-center gap-2 text-sm text-white/70 hover:text-marca-claro"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+        </svg>
+        @{site.instagramUsuario}
+      </a>
     </div>
 
+    <!-- Navegue -->
     <div>
       <h3 class="text-sm font-semibold text-white">Navegue</h3>
       <ul class="mt-3 space-y-2 text-sm text-white/70">
@@ -32,25 +45,37 @@ const linkWpp = linkWhatsApp(mensagemGeral());
       </ul>
     </div>
 
+    <!-- Atendimento -->
     <div>
-      <h3 class="text-sm font-semibold text-white">Contato</h3>
+      <h3 class="text-sm font-semibold text-white">Atendimento</h3>
       <ul class="mt-3 space-y-2 text-sm text-white/70">
         <li>
-          <a class="hover:text-marca-claro" href={site.instagramUrl} target="_blank" rel="noopener">
-            Instagram @{site.instagramUsuario}
+          <a class="hover:text-marca-claro" href={linkWpp} target="_blank" rel="noopener">
+            Pedidos e dúvidas no WhatsApp
           </a>
         </li>
         <li>
-          <a class="hover:text-marca-claro" href={linkWpp} target="_blank" rel="noopener">
-            Pedidos pelo WhatsApp
+          <a class="hover:text-marca-claro" href={site.instagramUrl} target="_blank" rel="noopener">
+            Instagram @{site.instagramUsuario}
           </a>
         </li>
         {site.email && (
           <li><a class="hover:text-marca-claro" href={`mailto:${site.email}`}>{site.email}</a></li>
         )}
         {site.mostrarEndereco && site.endereco && (
-          <li>{site.endereco}</li>
+          <li class="text-white/60">{site.endereco}</li>
         )}
+      </ul>
+    </div>
+
+    <!-- Compra -->
+    <div>
+      <h3 class="text-sm font-semibold text-white">Como funciona</h3>
+      <ul class="mt-3 space-y-2 text-sm text-white/70">
+        <li>Envio para todo o Brasil</li>
+        <li>Pagamento via Pix (combinado no WhatsApp)</li>
+        <li>Pedido finalizado pelo WhatsApp</li>
+        <li>{site.anosDeTradicao} anos de tradição</li>
       </ul>
     </div>
   </div>

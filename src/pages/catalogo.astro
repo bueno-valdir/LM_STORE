@@ -19,6 +19,22 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </p>
     </header>
 
+    <!-- Campo de busca (filtra na hora). -->
+    <div class="mb-4">
+      <div class="relative max-w-md">
+        <input
+          id="busca"
+          type="search"
+          placeholder="Buscar por nome ou marca..."
+          aria-label="Buscar produtos"
+          class="w-full rounded-full border border-fundo-borda bg-fundo px-4 py-2 pr-10 text-sm text-texto placeholder:text-texto-suave focus-visible:border-marca"
+        />
+        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-texto-suave">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.3-4.3" /></svg>
+        </span>
+      </div>
+    </div>
+
     <!-- Barra de filtros (preenchida pelo navegador). Ancora #promocoes. -->
     <div id="promocoes" class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar produtos"></div>
 
@@ -41,6 +57,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   const grade = document.getElementById('grade')!;
   const barra = document.getElementById('promocoes')!;
+  const busca = document.getElementById('busca') as HTMLInputElement | null;
   const carregando = document.getElementById('carregando');
   const vazio = document.getElementById('vazio');
   const erro = document.getElementById('erro');
@@ -49,8 +66,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const CLASSE_FILTRO =
     'filtro-btn etiqueta border border-fundo-borda bg-fundo-claro text-texto-suave aria-selected:border-marca aria-selected:bg-marca aria-selected:text-white';
 
+  // Le os parametros da URL: ?q=busca e ?cat=categoria.
+  const params = new URLSearchParams(location.search);
   let produtos: ProdutoView[] = [];
-  let filtroAtual = 'todos';
+  let filtroAtual = params.get('cat') || 'todos';
+  let termo = (params.get('q') || '').trim().toLowerCase();
 
   function montarFiltros() {
     const categorias = Array.from(new Set(produtos.map((p) => p.categoria).filter(Boolean)));
@@ -62,10 +82,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       ...(temPromo ? [{ valor: 'promocao', rotulo: 'Promoções' }] : []),
     ];
 
+    // Se o filtro vindo da URL nao existir, volta para "todos".
+    if (!filtros.some((f) => f.valor === filtroAtual)) filtroAtual = 'todos';
+
     barra.innerHTML = filtros
       .map(
-        (f, i) =>
-          `<button type="button" class="${CLASSE_FILTRO}" data-filtro="${esc(f.valor)}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}">${esc(f.rotulo)}</button>`,
+        (f) =>
+          `<button type="button" class="${CLASSE_FILTRO}" data-filtro="${esc(f.valor)}" role="tab" aria-selected="${f.valor === filtroAtual ? 'true' : 'false'}">${esc(f.rotulo)}</button>`,
       )
       .join('');
 
@@ -81,9 +104,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   function renderizar() {
     const lista = produtos.filter((p) => {
-      if (filtroAtual === 'todos') return true;
-      if (filtroAtual === 'promocao') return p.promocao;
-      return p.categoria === filtroAtual;
+      // Filtro por categoria/promocao.
+      const passaFiltro =
+        filtroAtual === 'todos'
+          ? true
+          : filtroAtual === 'promocao'
+            ? p.promocao
+            : p.categoria === filtroAtual;
+      if (!passaFiltro) return false;
+
+      // Filtro por texto de busca (nome, marca ou categoria).
+      if (termo) {
+        const alvo = `${p.nome} ${p.marca} ${p.categoria}`.toLowerCase();
+        if (!alvo.includes(termo)) return false;
+      }
+      return true;
     });
 
     grade.innerHTML = lista.map(cardHTML).join('');
@@ -100,13 +135,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return;
       }
 
+      // Se a pagina abrir via #promocoes (e sem ?cat), comeca nas promocoes.
+      if (!params.get('cat') && location.hash === '#promocoes' && produtos.some((p) => p.promocao)) {
+        filtroAtual = 'promocao';
+      }
+
       montarFiltros();
 
-      // Se a pagina abrir via #promocoes, comeca filtrando promocoes.
-      if (location.hash === '#promocoes' && produtos.some((p) => p.promocao)) {
-        filtroAtual = 'promocao';
-        barra.querySelectorAll('.filtro-btn').forEach((b) => {
-          b.setAttribute('aria-selected', b.getAttribute('data-filtro') === 'promocao' ? 'true' : 'false');
+      // Preenche e liga o campo de busca (filtra ao digitar).
+      if (busca) {
+        busca.value = termo;
+        busca.addEventListener('input', () => {
+          termo = busca.value.trim().toLowerCase();
+          renderizar();
         });
       }
 

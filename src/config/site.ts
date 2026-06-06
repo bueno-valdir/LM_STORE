@@ -16,6 +16,31 @@ export const site = {
   /** Texto da barra de aviso no topo do site (edite a vontade). */
   barraAviso: 'Envio para todo o Brasil • Pedido fácil pelo WhatsApp • 9 anos de tradição',
 
+  /**
+   * Slides do banner principal (hero) da home. Edite os textos a vontade.
+   * Quando tiver as artes do Canva, da pra trocar por imagens (campo imagem).
+   */
+  heroSlides: [
+    {
+      etiqueta: '9 anos de tradição',
+      titulo: 'Beleza acessível,',
+      destaque: 'real e sem filtro',
+      texto: 'Maquiagem e skincare selecionados com carinho, com envio para todo o Brasil.',
+    },
+    {
+      etiqueta: 'Queridinhos',
+      titulo: 'Make e skincare',
+      destaque: 'que cabem no bolso',
+      texto: 'Preço honesto, produto bom e atendimento próximo, do jeitinho que você merece.',
+    },
+    {
+      etiqueta: 'Atendimento humano',
+      titulo: 'Peça fácil pelo',
+      destaque: 'WhatsApp',
+      texto: 'Você escolhe, a gente conversa e cuida do resto. Rápido e sem complicação.',
+    },
+  ],
+
   /** Descricao usada em SEO e Open Graph (preview ao compartilhar link). */
   descricao:
     'Maquiagem e skincare com beleza acessível, real e sem filtro. ' +

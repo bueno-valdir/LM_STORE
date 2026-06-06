@@ -1,70 +1,23 @@
 ---
 /**
- * Home: hero com a identidade da marca, destaques, faixa de promocao e CTA.
+ * Home: hero em carrossel, selos de confianca, carrosseis de produtos e CTA.
+ * Os produtos sao lidos do painel pelo navegador.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WhatsAppButton from '../components/WhatsAppButton.astro';
+import Hero from '../components/Hero.astro';
 import Selos from '../components/Selos.astro';
-import { site } from '../config/site';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { withBase } from '../lib/url';
 ---
 
 <BaseLayout>
-  <!-- HERO -->
-  <section class="relative overflow-hidden">
-    <!-- Brilho do gradiente da marca ao fundo. -->
-    <div
-      class="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-gradiente-marca opacity-20 blur-3xl"
-      aria-hidden="true"
-    >
-    </div>
-
-    <div class="container-loja grid items-center gap-8 py-12 md:grid-cols-2 md:py-20">
-      <div>
-        <span class="etiqueta bg-marca/10 text-marca-escuro">
-          {site.anosDeTradicao} anos de tradição
-        </span>
-        <h1 class="mt-4 font-titulo text-4xl font-bold leading-tight text-texto sm:text-5xl">
-          Beleza acessível,
-          <span class="bg-gradiente-marca bg-clip-text text-transparent">real e sem filtro</span>
-        </h1>
-        <p class="mt-4 max-w-md text-texto-suave">
-          {site.slogan}. Maquiagem e skincare selecionados com carinho em
-          {site.cidade}, com envio para todo o Brasil e pedido fácil pelo WhatsApp.
-        </p>
-        <div class="mt-6 flex flex-wrap gap-3">
-          <a href={withBase('/catalogo')} class="btn-marca">Ver catálogo</a>
-          <WhatsAppButton variante="contorno" rotulo="Falar no WhatsApp" />
-        </div>
-      </div>
-
-      <!-- Cartao visual do hero (placeholder do logo/identidade). -->
-      <div class="relative">
-        <div class="aspect-square rounded-marca border border-fundo-borda bg-fundo-claro p-6">
-          <div class="grid h-full place-items-center rounded-marca bg-gradiente-marca/10">
-            <div class="text-center">
-              <div class="mx-auto grid h-24 w-24 place-items-center rounded-full bg-gradiente-marca text-white">
-                <span class="font-manuscrita text-3xl">M</span>
-              </div>
-              <p class="mt-4 font-manuscrita text-2xl text-texto">{site.nome}</p>
-              <!-- TODO (assets reais): trocar por foto/banner real da marca (Canva). -->
-              <p class="mt-1 text-xs text-texto-suave">Imagem placeholder (substituir)</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SELOS DE CONFIANCA -->
+  <Hero />
   <Selos />
 
   <!-- FAIXA DE PROMOCAO (mostrada pelo navegador se houver promocoes). -->
   <section id="faixa-promo" class="hidden bg-gradiente-marca">
     <div class="container-loja flex flex-wrap items-center justify-between gap-3 py-4 text-white">
-      <p class="font-titulo font-semibold">
-        Promoções da semana com precinho que cabe no bolso
-      </p>
+      <p class="font-titulo font-semibold">Promoções da semana com precinho que cabe no bolso</p>
       <a
         href={withBase('/catalogo#promocoes')}
         class="rounded-marca bg-white px-4 py-2 text-sm font-semibold text-preto transition-transform hover:scale-[1.02]"
@@ -74,46 +27,15 @@ import { withBase } from '../lib/url';
     </div>
   </section>
 
-  <!-- DESTAQUES (preenchidos pelo navegador). -->
-  <section class="container-loja py-12">
-    <div class="mb-6 flex items-end justify-between">
-      <div>
-        <h2 class="font-titulo text-2xl font-bold text-texto">Destaques</h2>
-        <p class="text-sm text-texto-suave">Queridinhos selecionados pra você.</p>
-      </div>
-      <a href={withBase('/catalogo')} class="text-sm font-medium text-marca-escuro hover:underline">Ver tudo</a>
-    </div>
-
-    <div id="destaques-grid" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"></div>
-    <p id="destaques-vazio" class="hidden text-texto-suave">Em breve, novos destaques por aqui.</p>
-  </section>
-
-  <script>
-    import { carregarProdutos, cardHTML } from '../lib/clienteProdutos';
-
-    const grid = document.getElementById('destaques-grid');
-    const vazio = document.getElementById('destaques-vazio');
-    const faixa = document.getElementById('faixa-promo');
-
-    carregarProdutos()
-      .then((produtos) => {
-        if (faixa && produtos.some((p) => p.promocao)) faixa.classList.remove('hidden');
-
-        const destaques = produtos.filter((p) => p.destaque);
-        if (grid && destaques.length) {
-          grid.innerHTML = destaques.map(cardHTML).join('');
-        } else {
-          vazio?.classList.remove('hidden');
-        }
-      })
-      .catch((e) => {
-        console.error('[home] erro ao carregar destaques:', e);
-        vazio?.classList.remove('hidden');
-      });
-  </script>
+  <!-- CARROSSEIS DE PRODUTOS (preenchidos pelo navegador). -->
+  <div id="carrosseis"></div>
+  <p id="carrosseis-carregando" class="container-loja py-12 text-center text-texto-suave">Carregando produtos...</p>
+  <p id="carrosseis-vazio" class="hidden container-loja py-12 text-center text-texto-suave">
+    Em breve, novos produtos por aqui.
+  </p>
 
   <!-- CTA FINAL -->
-  <section class="container-loja pb-12">
+  <section class="container-loja py-12">
     <div class="rounded-marca border border-fundo-borda bg-fundo-claro p-8 text-center">
       <h2 class="font-titulo text-2xl font-bold text-texto">Ficou com vontade?</h2>
       <p class="mx-auto mt-2 max-w-md text-texto-suave">
@@ -124,4 +46,56 @@ import { withBase } from '../lib/url';
       </div>
     </div>
   </section>
+
+  <script>
+    import { carregarProdutos, carrosselHTML } from '../lib/clienteProdutos';
+    import { withBase } from '../lib/url';
+
+    const cont = document.getElementById('carrosseis')!;
+    const carregando = document.getElementById('carrosseis-carregando');
+    const vazio = document.getElementById('carrosseis-vazio');
+    const faixa = document.getElementById('faixa-promo');
+
+    carregarProdutos()
+      .then((produtos) => {
+        carregando?.classList.add('hidden');
+        if (!produtos.length) {
+          vazio?.classList.remove('hidden');
+          return;
+        }
+
+        if (faixa && produtos.some((p) => p.promocao)) faixa.classList.remove('hidden');
+
+        const destaques = produtos.filter((p) => p.destaque);
+        const promocoes = produtos.filter((p) => p.promocao);
+
+        let html = carrosselHTML(
+          'Destaques',
+          'Queridinhos selecionados pra você',
+          withBase('/catalogo'),
+          destaques.length ? destaques : produtos,
+        );
+        if (promocoes.length) {
+          html += carrosselHTML('Promoções', 'Aproveite enquanto dura', withBase('/catalogo#promocoes'), promocoes);
+        }
+        cont.innerHTML = html;
+
+        // Liga as setas de cada carrossel a sua trilha.
+        cont.querySelectorAll<HTMLElement>('.carrossel-track').forEach((track) => {
+          const sec = track.closest('section');
+          const passo = () => track.clientWidth * 0.8;
+          sec?.querySelector('.carrossel-next')?.addEventListener('click', () =>
+            track.scrollBy({ left: passo(), behavior: 'smooth' }),
+          );
+          sec?.querySelector('.carrossel-prev')?.addEventListener('click', () =>
+            track.scrollBy({ left: -passo(), behavior: 'smooth' }),
+          );
+        });
+      })
+      .catch((e) => {
+        console.error('[home] erro ao carregar produtos:', e);
+        carregando?.classList.add('hidden');
+        vazio?.classList.remove('hidden');
+      });
+  </script>
 </BaseLayout>

@@ -1,0 +1,95 @@
+---
+/**
+ * Banner principal (hero) em carrossel.
+ * Os slides vem de site.heroSlides. Por enquanto sao banners de texto sobre o
+ * gradiente da marca; quando tiver as artes do Canva, da pra trocar por imagens.
+ */
+import { site } from '../config/site';
+import WhatsAppButton from './WhatsAppButton.astro';
+import { withBase } from '../lib/url';
+
+const slides = site.heroSlides;
+---
+
+<section class="relative overflow-hidden bg-fundo">
+  <!-- Brilho do gradiente ao fundo. -->
+  <div
+    class="pointer-events-none absolute -top-24 right-0 h-72 w-72 rounded-full bg-gradiente-marca opacity-20 blur-3xl"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div id="hero" class="container-loja py-10 md:py-16">
+    <div class="relative">
+      {
+        slides.map((slide, i) => (
+          <div
+            class:list={['hero-slide', { hidden: i !== 0 }]}
+            data-slide={i}
+          >
+            <div class="mx-auto max-w-2xl text-center">
+              <span class="etiqueta bg-marca/10 text-marca-escuro">{slide.etiqueta}</span>
+              <h1 class="mt-4 font-titulo text-4xl font-bold leading-tight text-texto sm:text-5xl">
+                {slide.titulo}{' '}
+                <span class="bg-gradiente-marca bg-clip-text text-transparent">{slide.destaque}</span>
+              </h1>
+              <p class="mx-auto mt-4 max-w-lg text-texto-suave">{slide.texto}</p>
+            </div>
+          </div>
+        ))
+      }
+
+      <!-- CTAs fixos (valem para todos os slides). -->
+      <div class="mt-7 flex flex-wrap justify-center gap-3">
+        <a href={withBase('/catalogo')} class="btn-marca">Ver catálogo</a>
+        <WhatsAppButton variante="contorno" rotulo="Falar no WhatsApp" />
+      </div>
+
+      <!-- Bolinhas de navegacao. -->
+      {
+        slides.length > 1 && (
+          <div id="hero-dots" class="mt-8 flex justify-center gap-2">
+            {slides.map((_, i) => (
+              <button
+                type="button"
+                class="hero-dot h-2.5 w-2.5 rounded-full bg-fundo-borda aria-[current=true]:w-6 aria-[current=true]:bg-marca"
+                data-dot={i}
+                aria-current={i === 0 ? 'true' : 'false'}
+                aria-label={`Ir para o slide ${i + 1}`}
+              />
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  // Carrossel do hero: troca os slides e marca a bolinha ativa.
+  const slides = Array.from(document.querySelectorAll<HTMLElement>('.hero-slide'));
+  const dots = Array.from(document.querySelectorAll<HTMLButtonElement>('.hero-dot'));
+  let atual = 0;
+  let timer: number | undefined;
+
+  function mostrar(i: number) {
+    atual = (i + slides.length) % slides.length;
+    slides.forEach((s, idx) => s.classList.toggle('hidden', idx !== atual));
+    dots.forEach((d, idx) => d.setAttribute('aria-current', idx === atual ? 'true' : 'false'));
+  }
+
+  function iniciarAuto() {
+    if (slides.length < 2) return;
+    timer = window.setInterval(() => mostrar(atual + 1), 6000);
+  }
+
+  dots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      mostrar(Number(dot.dataset.dot));
+      window.clearInterval(timer);
+      iniciarAuto();
+    });
+  });
+
+  iniciarAuto();
+</script>
