@@ -26,3 +26,7 @@ Thumbs.db
 # editor
 .vscode/
 .idea/
+
+# Dados do PocketBase (nunca versionar)
+pb_data/
+*.env

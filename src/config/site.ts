@@ -96,6 +96,24 @@ export const site = {
    * Deixe vazio ('') para usar os produtos de exemplo do JSON local.
    */
   pocketbaseUrl: 'https://painel.lmstore.veraxlegalops.com.br',
+
+  /**
+   * CHECKOUT (Mercado Pago) - travas de seguranca.
+   *
+   * IMPORTANTE: aqui SO entram dados publicos. A chave SECRETA (access token)
+   * fica APENAS no servidor, em variavel de ambiente (MP_ACCESS_TOKEN), nunca
+   * neste arquivo nem no navegador.
+   */
+  checkout: {
+    /** Liga/desliga o checkout no site. Mantenha false ate validar em sandbox. */
+    ativo: false,
+    /** Ambiente: 'sandbox' (teste, sem dinheiro real) ou 'producao'. */
+    ambiente: 'sandbox' as 'sandbox' | 'producao',
+    /** Chave PUBLICA do Mercado Pago (pode ficar no site; nao e secreta). */
+    mpPublicKey: '',
+    /** Quantidade maxima por item (trava anti-abuso). */
+    maxQtdItem: 20,
+  },
 } as const;
 
 export type SiteConfig = typeof site;

@@ -31,6 +31,22 @@ services:
     volumes:
       # Banco de dados e imagens ficam aqui (persistente no host).
       - /docker/lmstore-pocketbase/pb_data:/pb_data
+      # Hooks do servidor (checkout etc.). Coloque o lm_checkout.pb.js aqui.
+      - /docker/lmstore-pocketbase/pb_hooks:/pb_hooks
+    # Segredos do checkout: definidos no arquivo .env (na mesma pasta deste
+    # compose, NO VPS), que NAO vai para o repositorio. Ex. de .env:
+    #   CHECKOUT_ATIVO=false
+    #   CHECKOUT_AMBIENTE=sandbox
+    #   MP_ACCESS_TOKEN=...        (SECRETO, so no servidor)
+    #   MP_WEBHOOK_SECRET=...
+    #   SITE_PUBLIC_URL=https://lmstore.veraxlegalops.com.br
+    environment:
+      - CHECKOUT_ATIVO=${CHECKOUT_ATIVO:-false}
+      - CHECKOUT_AMBIENTE=${CHECKOUT_AMBIENTE:-sandbox}
+      - CHECKOUT_MAX_QTD=${CHECKOUT_MAX_QTD:-20}
+      - MP_ACCESS_TOKEN=${MP_ACCESS_TOKEN:-}
+      - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET:-}
+      - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://lmstore.veraxlegalops.com.br}
     networks:
       - traefik
     labels:
