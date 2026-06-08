@@ -8,6 +8,7 @@ on:
   push:
     branches:
       - dev
+      - painel-conteudo
   # Permite acionar manualmente pelo botao "Run workflow" na aba Actions.
   workflow_dispatch:
 
