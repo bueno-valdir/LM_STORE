@@ -2,16 +2,15 @@
 /**
  * Logo da marca.
  *
- * TODO (assets reais): substituir este placeholder pelo logo oficial do Canva
- * (anel circular com gradiente rosa/laranja/dourado e nome manuscrito).
- * Coloque o arquivo em /public/logo.svg (ou .png) e troque o markup abaixo por:
- *   <img src="/logo.svg" alt="Lojinha da Miih" class="h-10 w-auto" />
+ * Mostra um placeholder (anel com "M") e, se houver uma logo cadastrada no
+ * painel (colecao "configuracao", campo "logo"), troca pela imagem real.
+ * Aparece sobre fundo escuro (header e footer).
  */
 import { site } from '../config/site';
 ---
 
-<span class="inline-flex items-center gap-2" aria-label={site.nome}>
-  <!-- Anel rosa choque (placeholder do logo). Aparece sobre fundo escuro. -->
+<span class="logo-marca inline-flex items-center gap-2" aria-label={site.nome}>
+  <!-- Placeholder (trocado pela logo real, se houver). -->
   <span
     class="grid h-9 w-9 place-items-center rounded-full bg-gradiente-marca text-white"
     aria-hidden="true"
@@ -22,3 +21,15 @@ import { site } from '../config/site';
   </span>
   <span class="font-manuscrita text-xl leading-none text-white">{site.nome}</span>
 </span>
+
+<script>
+  import { carregarConfig } from '../lib/clienteConteudo';
+
+  carregarConfig().then((cfg) => {
+    if (!cfg.logoUrl) return;
+    const img = `<img src="${cfg.logoUrl}" alt="Lojinha da Miih" class="h-9 w-auto" />`;
+    document.querySelectorAll('.logo-marca').forEach((el) => {
+      el.innerHTML = img;
+    });
+  });
+</script>

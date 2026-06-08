@@ -1,13 +1,25 @@
 ---
 /**
  * Barra de aviso no topo do site (acima do header).
- * Texto configuravel em src/config/site.ts (barraAviso).
+ * Texto padrao vem de site.barraAviso; se houver texto cadastrado no painel
+ * (configuracao.barra_aviso), ele substitui ao carregar.
  */
 import { site } from '../config/site';
 ---
 
 <div class="bg-gradiente-marca text-white">
-  <div class="container-loja py-2 text-center text-xs font-medium sm:text-sm">
+  <div id="barra-aviso" class="container-loja py-2 text-center text-xs font-medium sm:text-sm">
     {site.barraAviso}
   </div>
 </div>
+
+<script>
+  import { carregarConfig } from '../lib/clienteConteudo';
+
+  carregarConfig().then((cfg) => {
+    if (cfg.barraAviso) {
+      const el = document.getElementById('barra-aviso');
+      if (el) el.textContent = cfg.barraAviso;
+    }
+  });
+</script>
