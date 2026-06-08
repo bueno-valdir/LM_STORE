@@ -27,9 +27,9 @@ import { site } from '../config/site';
 
   carregarConfig().then((cfg) => {
     if (!cfg.logoUrl) return;
-    const img = `<img src="${cfg.logoUrl}" alt="Lojinha da Miih" class="h-12 w-auto sm:h-14" />`;
+    const html = `<img src="${cfg.logoUrl}" alt="Lojinha da Miih" class="h-14 w-auto sm:h-16" /><span class="font-manuscrita text-2xl leading-none text-white">Lojinha da Miih</span>`;
     document.querySelectorAll('.logo-marca').forEach((el) => {
-      el.innerHTML = img;
+      el.innerHTML = html;
     });
   });
 </script>
