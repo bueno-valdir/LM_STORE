@@ -95,19 +95,39 @@ function mapear(rec: any): ProdutoView {
   };
 }
 
-/** Busca todos os produtos do painel. */
-export async function carregarProdutos(): Promise<ProdutoView[]> {
-  if (!PB) return [];
-  const res = await fetch(`${PB}/api/collections/produtos/records?perPage=200&sort=-created`);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const json = await res.json();
-  return (json.items || []).map(mapear);
+/**
+ * Busca todos os produtos do painel.
+ * - `cache: 'no-store'`: sempre pega dados frescos (mudancas no painel refletem na hora).
+ * - dedupe: dentro do mesmo carregamento de pagina, varios componentes reusam
+ *   a mesma busca (em vez de baterem no servidor varias vezes). Recarregar a
+ *   pagina zera esse cache, entao nunca fica dado velho.
+ */
+let _cacheProdutos: Promise<ProdutoView[]> | null = null;
+export function carregarProdutos(): Promise<ProdutoView[]> {
+  if (!PB) return Promise.resolve([]);
+  if (_cacheProdutos) return _cacheProdutos;
+  _cacheProdutos = (async () => {
+    const res = await fetch(
+      `${PB}/api/collections/produtos/records?perPage=200&sort=-created`,
+      { cache: 'no-store' },
+    );
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    return (json.items || []).map(mapear);
+  })().catch((e) => {
+    _cacheProdutos = null; // permite tentar de novo numa proxima chamada
+    throw e;
+  });
+  return _cacheProdutos;
 }
 
-/** Busca um produto pelo id. */
+/** Busca um produto pelo id (sempre fresco). */
 export async function carregarProduto(id: string): Promise<ProdutoView | null> {
   if (!PB || !id) return null;
-  const res = await fetch(`${PB}/api/collections/produtos/records/${encodeURIComponent(id)}`);
+  const res = await fetch(
+    `${PB}/api/collections/produtos/records/${encodeURIComponent(id)}`,
+    { cache: 'no-store' },
+  );
   if (!res.ok) return null;
   return mapear(await res.json());
 }
