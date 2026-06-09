@@ -1,216 +1,255 @@
 /// <reference path="../pb_data/types.d.ts" />
 //
-// CHECKOUT (Mercado Pago) - hook do servidor (PocketBase).
-// =========================================================
-// Este arquivo roda NO SERVIDOR (dentro do PocketBase), entao e o lugar certo
-// para as travas de seguranca. Ele NUNCA roda no navegador do cliente.
+// CHECKOUT (Stripe) + FRETE (Melhor Envio) - hook do servidor (PocketBase).
+// =========================================================================
+// Roda NO SERVIDOR (dentro do PocketBase). E o lugar das travas de seguranca.
+// Nunca roda no navegador. Tudo desligado ate CHECKOUT_ATIVO=true (sandbox).
 //
-// TRAVAS implementadas aqui:
+// TRAVAS:
 //  1) Preco recalculado no servidor a partir do banco (nunca confia no cliente).
-//  2) Pedido e total gravados pelo servidor (a colecao "pedidos" fica trancada).
-//  3) Chave secreta lida de variavel de ambiente (MP_ACCESS_TOKEN), nunca no codigo.
-//  4) Confirmacao de pagamento so via webhook + verificacao de assinatura.
-//  5) So funciona se CHECKOUT_ATIVO=true (desligado por padrao). Sandbox primeiro.
+//  2) Pedido/total gravados pelo servidor (colecao "pedidos" fica trancada).
+//  3) Chaves secretas via variavel de ambiente (nunca no codigo/cliente).
+//  4) Pagamento so vira "pago" via webhook do Stripe + verificacao de assinatura.
+//  5) So funciona com CHECKOUT_ATIVO=true. Sandbox primeiro.
 //
-// ATENCAO: este e o ESQUELETO seguro. Antes de usar com dinheiro real:
+// ATENCAO: este e o ESQUELETO. Antes de usar com dinheiro real:
 //  - criar a colecao "pedidos" (ver deploy/CHECKOUT.md)
-//  - definir as variaveis de ambiente (MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET, etc.)
-//  - TESTAR no sandbox do Mercado Pago
-//  - conferir a API conforme a versao do seu PocketBase (rotas/JSVM podem variar)
+//  - definir as variaveis de ambiente (STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET,
+//    MELHOR_ENVIO_TOKEN, etc.)
+//  - TESTAR no sandbox (Stripe test + Melhor Envio sandbox)
+//  - conferir os detalhes marcados como TODO conforme a versao do PocketBase
 
-const MOEDA = 'BRL';
+const MOEDA = 'brl';
 
-/** Le uma variavel de ambiente (ou retorna o padrao). */
 function env(nome, padrao) {
   const v = $os.getenv(nome);
   return v && v.length ? v : padrao;
 }
-
-/** O checkout esta ligado? (trava mestra) */
-function checkoutAtivo() {
+function ativo() {
   return env('CHECKOUT_ATIVO', 'false') === 'true';
 }
+function ehProducao() {
+  return env('CHECKOUT_AMBIENTE', 'sandbox') === 'producao';
+}
+function siteUrl() {
+  return env('SITE_PUBLIC_URL', 'https://lojinhadamiih.com.br').replace(/\/$/, '');
+}
 
-/** Base da API do Mercado Pago. */
-const MP_API = 'https://api.mercadopago.com';
-
-// ---------------------------------------------------------------------------
-// Rota: criar pedido + preferencia de pagamento.
-// O cliente manda apenas { itens: [{ id, qty }], cliente?: {...} }.
-// O SERVIDOR decide o preco. O cliente NAO manda preco nem total.
-// ---------------------------------------------------------------------------
-routerAdd('POST', '/lm/checkout', (e) => {
-  if (!checkoutAtivo()) {
-    return e.json(503, { erro: 'Checkout indisponivel no momento.' });
-  }
-
-  // Le o corpo da requisicao.
-  const body = e.requestInfo().body || {};
-  const itensEntrada = Array.isArray(body.itens) ? body.itens : [];
-  if (!itensEntrada.length) {
-    return e.json(400, { erro: 'Carrinho vazio.' });
-  }
-
+/** Le e valida os itens do corpo, recalculando preco/peso pelo banco (TRAVA 1). */
+function validarItens(itensEntrada) {
   const maxQtd = parseInt(env('CHECKOUT_MAX_QTD', '20'), 10);
-
-  // TRAVA 1: recalcula tudo no servidor, a partir do banco.
-  const itensValidados = [];
+  const out = [];
   let total = 0;
-
-  for (const item of itensEntrada) {
+  for (const item of itensEntrada || []) {
     const id = String(item && item.id ? item.id : '');
     let qty = parseInt(item && item.qty ? item.qty : 0, 10);
-    if (!id || !Number.isFinite(qty) || qty < 1) {
-      return e.json(400, { erro: 'Item invalido.' });
-    }
-    if (qty > maxQtd) qty = maxQtd; // trava anti-abuso
+    if (!id || !Number.isFinite(qty) || qty < 1) throw new Error('Item invalido');
+    if (qty > maxQtd) qty = maxQtd;
 
-    let produto;
+    let p;
     try {
-      produto = $app.findRecordById('produtos', id);
+      p = $app.findRecordById('produtos', id);
     } catch (_) {
-      return e.json(400, { erro: 'Produto nao encontrado: ' + id });
+      throw new Error('Produto nao encontrado: ' + id);
     }
+    if (!p.getBool('disponivel')) throw new Error('Esgotado: ' + p.getString('nome'));
 
-    // Indisponivel nao pode ser comprado.
-    if (!produto.getBool('disponivel')) {
-      return e.json(409, { erro: 'Produto esgotado: ' + produto.getString('nome') });
-    }
-
-    // Preco vigente: promocional quando existir, senao o normal. SERVIDOR decide.
-    const preco = produto.getFloat('preco');
-    const promo = produto.getFloat('preco_promocional');
+    const preco = p.getFloat('preco');
+    const promo = p.getFloat('preco_promocional');
     const precoFinal = promo && promo > 0 ? promo : preco;
-    if (!precoFinal || precoFinal <= 0) {
-      return e.json(409, { erro: 'Produto sem preco: ' + produto.getString('nome') });
-    }
+    if (!precoFinal || precoFinal <= 0) throw new Error('Sem preco: ' + p.getString('nome'));
 
-    const subtotal = precoFinal * qty;
-    total += subtotal;
-    itensValidados.push({
+    out.push({
       produtoId: id,
-      nome: produto.getString('nome'),
+      nome: p.getString('nome'),
       qty: qty,
       precoUnit: precoFinal,
-      subtotal: subtotal,
+      pesoKg: p.getFloat('peso') || 0.3,
+      alturaCm: p.getFloat('altura') || 10,
+      larguraCm: p.getFloat('largura') || 15,
+      comprimentoCm: p.getFloat('comprimento') || 20,
     });
+    total += precoFinal * qty;
+  }
+  if (!out.length) throw new Error('Carrinho vazio');
+  return { itens: out, total };
+}
+
+// ---------------------------------------------------------------------------
+// FRETE: calcula via Melhor Envio. Body: { cepDestino, itens:[{id,qty}] }
+// ---------------------------------------------------------------------------
+routerAdd('POST', '/lm/frete', (e) => {
+  if (!ativo()) return e.json(503, { erro: 'Indisponivel' });
+  const body = e.requestInfo().body || {};
+  const cepDestino = String(body.cepDestino || '').replace(/\D/g, '');
+  if (cepDestino.length !== 8) return e.json(400, { erro: 'CEP invalido' });
+
+  let validado;
+  try {
+    validado = validarItens(body.itens);
+  } catch (err) {
+    return e.json(400, { erro: String(err.message || err) });
   }
 
-  if (total <= 0) {
-    return e.json(400, { erro: 'Total invalido.' });
+  const token = env('MELHOR_ENVIO_TOKEN', '');
+  if (!token) return e.json(500, { erro: 'Frete nao configurado' });
+  const base = ehProducao()
+    ? 'https://www.melhorenvio.com.br'
+    : 'https://sandbox.melhorenvio.com.br';
+
+  const produtos = validado.itens.map((it) => ({
+    id: it.produtoId,
+    width: it.larguraCm,
+    height: it.alturaCm,
+    length: it.comprimentoCm,
+    weight: it.pesoKg,
+    insurance_value: it.precoUnit,
+    quantity: it.qty,
+  }));
+
+  const resp = $http.send({
+    url: base + '/api/v2/me/shipment/calculate',
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      // Melhor Envio exige User-Agent com contato.
+      'User-Agent': 'Lojinha da Miih (' + env('CONTATO_EMAIL', 'contato.lojinhadamiih@gmail.com') + ')',
+    },
+    body: JSON.stringify({
+      from: { postal_code: env('CEP_ORIGEM', '18000000') },
+      to: { postal_code: cepDestino },
+      products: produtos,
+    }),
+    timeout: 20,
+  });
+
+  if (resp.statusCode < 200 || resp.statusCode >= 300) {
+    return e.json(502, { erro: 'Falha ao calcular o frete' });
   }
 
-  // TRAVA 2: grava o pedido pelo servidor (a colecao fica trancada para o cliente).
+  // Filtra opcoes validas (sem erro) e devolve o essencial.
+  const opcoes = (resp.json || [])
+    .filter((o) => o && o.price && !o.error)
+    .map((o) => ({
+      id: o.id,
+      nome: (o.company && o.company.name ? o.company.name + ' - ' : '') + o.name,
+      preco: Number(o.price),
+      prazo: o.delivery_time,
+    }));
+
+  return e.json(200, { opcoes });
+});
+
+// ---------------------------------------------------------------------------
+// CHECKOUT: cria a sessao de pagamento no Stripe.
+// Body: { itens:[{id,qty}], frete:{nome,preco}, cliente:{nome,contato} }
+// ---------------------------------------------------------------------------
+routerAdd('POST', '/lm/checkout', (e) => {
+  if (!ativo()) return e.json(503, { erro: 'Checkout indisponivel' });
+  const body = e.requestInfo().body || {};
+
+  let validado;
+  try {
+    validado = validarItens(body.itens);
+  } catch (err) {
+    return e.json(400, { erro: String(err.message || err) });
+  }
+
+  // Frete: aceitamos o valor escolhido, mas o ideal e revalidar chamando o
+  // Melhor Envio de novo aqui. TODO (sandbox): revalidar o frete no servidor.
+  const fretePreco = Math.max(0, Number(body.frete && body.frete.preco ? body.frete.preco : 0));
+  const freteNome = String(body.frete && body.frete.nome ? body.frete.nome : 'Frete');
+
+  const total = validado.total + fretePreco;
+
+  // TRAVA 2: grava o pedido pelo servidor.
   const colPedidos = $app.findCollectionByNameOrId('pedidos');
   const pedido = new Record(colPedidos, {
-    itens: itensValidados,
+    itens: validado.itens,
     total: total,
+    frete: { nome: freteNome, preco: fretePreco },
     status: 'pendente',
     cliente_nome: body.cliente && body.cliente.nome ? String(body.cliente.nome).slice(0, 120) : '',
     cliente_contato: body.cliente && body.cliente.contato ? String(body.cliente.contato).slice(0, 120) : '',
   });
   $app.save(pedido);
 
-  // TRAVA 3: chave secreta vem do ambiente, nunca do codigo/cliente.
-  const accessToken = env('MP_ACCESS_TOKEN', '');
-  if (!accessToken) {
-    return e.json(500, { erro: 'Pagamento nao configurado (sem credencial no servidor).' });
+  // TRAVA 3: chave secreta do ambiente.
+  const secret = env('STRIPE_SECRET_KEY', '');
+  if (!secret) return e.json(500, { erro: 'Pagamento nao configurado' });
+
+  // Monta o corpo (form-urlencoded) da Stripe Checkout Session.
+  const params = [];
+  const add = (k, v) => params.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+  add('mode', 'payment');
+  add('success_url', siteUrl() + '/pedido-confirmado?id=' + pedido.id);
+  add('cancel_url', siteUrl() + '/carrinho');
+  // Metodos: cartao e Pix (Stripe Brasil).
+  add('payment_method_types[0]', 'card');
+  add('payment_method_types[1]', 'pix');
+  add('metadata[pedido_id]', pedido.id);
+
+  let li = 0;
+  for (const it of validado.itens) {
+    add(`line_items[${li}][price_data][currency]`, MOEDA);
+    add(`line_items[${li}][price_data][product_data][name]`, it.nome);
+    add(`line_items[${li}][price_data][unit_amount]`, Math.round(it.precoUnit * 100)); // centavos
+    add(`line_items[${li}][quantity]`, it.qty);
+    li++;
+  }
+  if (fretePreco > 0) {
+    add(`line_items[${li}][price_data][currency]`, MOEDA);
+    add(`line_items[${li}][price_data][product_data][name]`, 'Frete (' + freteNome + ')');
+    add(`line_items[${li}][price_data][unit_amount]`, Math.round(fretePreco * 100));
+    add(`line_items[${li}][quantity]`, 1);
   }
 
-  const siteUrl = env('SITE_PUBLIC_URL', 'https://lmstore.veraxlegalops.com.br');
-
-  // Monta a preferencia do Mercado Pago (checkout hospedado).
-  const pref = {
-    items: itensValidados.map((it) => ({
-      title: it.nome,
-      quantity: it.qty,
-      unit_price: it.precoUnit,
-      currency_id: MOEDA,
-    })),
-    external_reference: pedido.id, // liga o pagamento ao nosso pedido
-    back_urls: {
-      success: siteUrl + '/pedido-confirmado',
-      pending: siteUrl + '/pedido-confirmado',
-      failure: siteUrl + '/pedido-falhou',
-    },
-    auto_return: 'approved',
-    notification_url: siteUrl.replace(/\/$/, '') + '/lm/webhook', // ajustar p/ dominio do painel
-  };
-
-  // Cria a preferencia no Mercado Pago.
   const resp = $http.send({
-    url: MP_API + '/checkout/preferences',
+    url: 'https://api.stripe.com/v1/checkout/sessions',
     method: 'POST',
     headers: {
-      Authorization: 'Bearer ' + accessToken,
-      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + secret,
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify(pref),
+    body: params.join('&'),
     timeout: 20,
   });
 
   if (resp.statusCode < 200 || resp.statusCode >= 300) {
-    return e.json(502, { erro: 'Falha ao iniciar o pagamento.' });
+    return e.json(502, { erro: 'Falha ao iniciar o pagamento' });
   }
 
-  const dados = resp.json;
-  // Guarda o id da preferencia no pedido (para conferencia/idempotencia).
-  pedido.set('mp_preference_id', dados.id || '');
+  const sessao = resp.json;
+  pedido.set('stripe_session_id', sessao.id || '');
   $app.save(pedido);
 
-  // Devolve ao cliente apenas o link para pagar (init_point). Sem dados sensiveis.
-  const initPoint =
-    env('CHECKOUT_AMBIENTE', 'sandbox') === 'producao'
-      ? dados.init_point
-      : dados.sandbox_init_point || dados.init_point;
-
-  return e.json(200, { pedidoId: pedido.id, init_point: initPoint });
+  return e.json(200, { pedidoId: pedido.id, url: sessao.url });
 });
 
 // ---------------------------------------------------------------------------
-// Rota: webhook do Mercado Pago (confirmacao de pagamento).
-// TRAVA 4: so confiamos no pagamento depois de verificar a assinatura E
-// consultar o status direto na API do Mercado Pago.
+// WEBHOOK do Stripe: confirma o pagamento. (TRAVA 4: verificar assinatura)
 // ---------------------------------------------------------------------------
-routerAdd('POST', '/lm/webhook', (e) => {
-  if (!checkoutAtivo()) {
-    return e.json(503, {});
-  }
+routerAdd('POST', '/lm/stripe-webhook', (e) => {
+  if (!ativo()) return e.json(503, {});
 
-  const accessToken = env('MP_ACCESS_TOKEN', '');
-  const webhookSecret = env('MP_WEBHOOK_SECRET', '');
+  const segredo = env('STRIPE_WEBHOOK_SECRET', '');
+  const assinatura = e.request.header.get('Stripe-Signature') || '';
 
-  // Verificacao de assinatura do webhook (cabecalho x-signature + x-request-id).
-  // TODO (sandbox): conferir o formato exato da assinatura na sua conta MP e
-  // implementar a verificacao HMAC com webhookSecret. Sem assinatura valida,
-  // NAO atualizamos o pedido.
-  const sig = e.request.header.get('x-signature') || '';
-  if (webhookSecret && !sig) {
-    return e.json(401, {});
-  }
+  // TODO (sandbox): implementar a verificacao HMAC-SHA256 da assinatura:
+  //   signed_payload = `${t}.${corpoBruto}`  (t vem do header Stripe-Signature)
+  //   esperado = HMAC_SHA256(signed_payload, segredo)  e comparar com v1.
+  // Sem assinatura valida, NAO confirmar o pedido.
+  if (segredo && !assinatura) return e.json(401, {});
 
-  const body = e.requestInfo().body || {};
-  const tipo = body.type || body.topic || '';
-  const paymentId =
-    (body.data && body.data.id) || body.id || (e.request.url ? '' : '');
+  const evento = e.requestInfo().body || {};
+  const tipo = evento.type || '';
+  if (tipo !== 'checkout.session.completed') return e.json(200, {}); // ignora o resto
 
-  if (tipo.indexOf('payment') === -1 || !paymentId) {
-    return e.json(200, {}); // ignora notificacoes que nao sao de pagamento
-  }
-
-  // Consulta o pagamento na API do MP (nao confia so na notificacao).
-  const resp = $http.send({
-    url: MP_API + '/v1/payments/' + paymentId,
-    method: 'GET',
-    headers: { Authorization: 'Bearer ' + accessToken },
-    timeout: 20,
-  });
-  if (resp.statusCode < 200 || resp.statusCode >= 300) {
-    return e.json(200, {});
-  }
-
-  const pg = resp.json;
-  const pedidoId = pg.external_reference;
+  const sessao = (evento.data && evento.data.object) || {};
+  const pedidoId = sessao.metadata && sessao.metadata.pedido_id;
+  const pago = sessao.payment_status === 'paid';
   if (!pedidoId) return e.json(200, {});
 
   let pedido;
@@ -219,19 +258,11 @@ routerAdd('POST', '/lm/webhook', (e) => {
   } catch (_) {
     return e.json(200, {});
   }
-
-  // Idempotencia: se ja esta pago, nao reprocessa.
-  const statusAtual = pedido.getString('status');
-  if (statusAtual === 'pago') return e.json(200, {});
-
-  // Mapeia o status do MP para o nosso.
-  let novo = 'pendente';
-  if (pg.status === 'approved') novo = 'pago';
-  else if (pg.status === 'rejected' || pg.status === 'cancelled') novo = 'cancelado';
-
-  pedido.set('status', novo);
-  pedido.set('mp_payment_id', String(paymentId));
-  $app.save(pedido);
-
+  if (pedido.getString('status') === 'pago') return e.json(200, {}); // idempotente
+  if (pago) {
+    pedido.set('status', 'pago');
+    pedido.set('stripe_payment_intent', String(sessao.payment_intent || ''));
+    $app.save(pedido);
+  }
   return e.json(200, {});
 });

@@ -1,0 +1,186 @@
+---
+/**
+ * Carrinho + checkout (Stripe) + frete (Melhor Envio).
+ * Fica VISIVEL apenas quando site.checkout.ativo = true. Enquanto desligado,
+ * mostra um aviso e mantem o pedido pelo WhatsApp.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import WhatsAppButton from '../components/WhatsAppButton.astro';
+import { site } from '../config/site';
+import { withBase } from '../lib/url';
+
+const checkoutAtivo = site.checkout.ativo;
+---
+
+<BaseLayout titulo="Carrinho" descricao="Seu carrinho na Lojinha da Miih.">
+  <section class="container-loja py-10">
+    <h1 class="font-titulo text-3xl font-bold text-texto">Seu carrinho</h1>
+
+    {
+      !checkoutAtivo ? (
+        <div class="mt-6 rounded-marca border border-fundo-borda bg-fundo-claro p-6">
+          <p class="text-texto-suave">
+            O carrinho e o pagamento online estao em preparacao. Por enquanto,
+            finalize seu pedido pelo WhatsApp, e rapidinho!
+          </p>
+          <div class="mt-4">
+            <WhatsAppButton rotulo="Pedir no WhatsApp" />
+          </div>
+        </div>
+      ) : (
+        <div class="mt-6 grid gap-8 lg:grid-cols-[1fr,360px]">
+          <div>
+            <div id="itens" />
+            <p id="vazio" class="hidden rounded-marca border border-fundo-borda bg-fundo-claro p-6 text-texto-suave">
+              Seu carrinho esta vazio.
+            </p>
+          </div>
+
+          <aside class="h-fit rounded-marca border border-fundo-borda bg-fundo-claro p-5">
+            <h2 class="font-titulo text-lg font-semibold text-texto">Resumo</h2>
+
+            <div class="mt-4">
+              <label class="text-sm font-medium text-texto" for="cep">Calcular frete (CEP)</label>
+              <div class="mt-1 flex gap-2">
+                <input id="cep" inputmode="numeric" placeholder="00000-000" class="w-full rounded-marca border border-fundo-borda bg-fundo px-3 py-2 text-sm" />
+                <button id="btn-frete" type="button" class="btn-contorno px-4 py-2 text-sm">Calcular</button>
+              </div>
+              <div id="frete-opcoes" class="mt-3 space-y-2" />
+              <p id="frete-msg" class="mt-2 hidden text-xs text-texto-suave" />
+            </div>
+
+            <dl class="mt-5 space-y-1 text-sm">
+              <div class="flex justify-between"><dt class="text-texto-suave">Subtotal</dt><dd id="subtotal" class="text-texto">R$ 0,00</dd></div>
+              <div class="flex justify-between"><dt class="text-texto-suave">Frete</dt><dd id="frete-valor" class="text-texto">-</dd></div>
+              <div class="mt-2 flex justify-between border-t border-fundo-borda pt-2 font-titulo text-base font-bold">
+                <dt class="text-texto">Total</dt><dd id="total" class="text-marca">R$ 0,00</dd>
+              </div>
+            </dl>
+
+            <button id="btn-pagar" type="button" class="btn-marca mt-5 w-full">Finalizar pagamento</button>
+            <p id="pagar-msg" class="mt-2 hidden text-center text-xs text-texto-suave" />
+          </aside>
+        </div>
+      )
+    }
+  </section>
+</BaseLayout>
+
+<script>
+  import { itens, definirQty, remover, total as totalCarrinho, paraCheckout } from '../lib/carrinho';
+  import { formatarPreco } from '../lib/clienteProdutos';
+  import { site } from '../config/site';
+
+  // So roda quando o checkout estiver ligado (e os elementos existirem na pagina).
+  if (site.checkout.ativo && document.getElementById('itens')) {
+    const PB = (site.pocketbaseUrl || '').replace(/\/$/, '');
+    const elItens = document.getElementById('itens')!;
+    const elVazio = document.getElementById('vazio');
+    const elSubtotal = document.getElementById('subtotal')!;
+    const elFreteValor = document.getElementById('frete-valor')!;
+    const elTotal = document.getElementById('total')!;
+    const elFreteOpcoes = document.getElementById('frete-opcoes')!;
+    const elFreteMsg = document.getElementById('frete-msg')!;
+    const elPagarMsg = document.getElementById('pagar-msg')!;
+
+    let freteEscolhido: { nome: string; preco: number } | null = null;
+    const fmt = (v: number) => formatarPreco(v) || 'R$ 0,00';
+
+    function atualizarTotais() {
+      const sub = totalCarrinho();
+      elSubtotal.textContent = fmt(sub);
+      elFreteValor.textContent = freteEscolhido ? fmt(freteEscolhido.preco) : '-';
+      elTotal.textContent = fmt(sub + (freteEscolhido ? freteEscolhido.preco : 0));
+    }
+
+    function mudarQty(id: string, delta: number) {
+      const atual = itens().find((i) => i.id === id);
+      if (!atual) return;
+      definirQty(id, atual.qty + delta);
+      render();
+    }
+
+    function render() {
+      const lista = itens();
+      elVazio?.classList.toggle('hidden', lista.length > 0);
+      elItens.innerHTML = lista
+        .map(
+          (i) => `
+        <div class="flex items-center gap-3 border-b border-fundo-borda py-3">
+          <img src="${i.imagem}" alt="" class="h-16 w-16 rounded-lg object-cover" />
+          <div class="flex-1">
+            <p class="text-sm font-semibold text-texto">${i.nome}</p>
+            <p class="text-sm text-marca">${fmt(i.preco)}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button data-menos="${i.id}" class="grid h-7 w-7 place-items-center rounded-full border border-fundo-borda">-</button>
+            <span class="w-6 text-center text-sm">${i.qty}</span>
+            <button data-mais="${i.id}" class="grid h-7 w-7 place-items-center rounded-full border border-fundo-borda">+</button>
+          </div>
+          <button data-rm="${i.id}" class="ml-2 text-xs text-texto-suave hover:text-marca">remover</button>
+        </div>`,
+        )
+        .join('');
+
+      elItens.querySelectorAll<HTMLButtonElement>('[data-mais]').forEach((b) =>
+        b.addEventListener('click', () => mudarQty(b.dataset.mais!, +1)),
+      );
+      elItens.querySelectorAll<HTMLButtonElement>('[data-menos]').forEach((b) =>
+        b.addEventListener('click', () => mudarQty(b.dataset.menos!, -1)),
+      );
+      elItens.querySelectorAll<HTMLButtonElement>('[data-rm]').forEach((b) =>
+        b.addEventListener('click', () => { remover(b.dataset.rm!); render(); }),
+      );
+
+      atualizarTotais();
+    }
+
+    document.getElementById('btn-frete')?.addEventListener('click', async () => {
+      const cep = (document.getElementById('cep') as HTMLInputElement).value.replace(/\D/g, '');
+      if (cep.length !== 8) { elFreteMsg.textContent = 'CEP invalido.'; elFreteMsg.classList.remove('hidden'); return; }
+      elFreteMsg.textContent = 'Calculando...'; elFreteMsg.classList.remove('hidden');
+      try {
+        const r = await fetch(`${PB}/lm/frete`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ cepDestino: cep, itens: paraCheckout() }),
+        });
+        const data = await r.json();
+        if (!r.ok || !data.opcoes || !data.opcoes.length) { elFreteMsg.textContent = 'Nao foi possivel calcular o frete.'; return; }
+        elFreteMsg.classList.add('hidden');
+        elFreteOpcoes.innerHTML = data.opcoes
+          .map(
+            (o: any, idx: number) =>
+              `<label class="flex items-center gap-2 text-sm"><input type="radio" name="frete" value="${idx}" data-nome="${o.nome}" data-preco="${o.preco}" /><span>${o.nome} - ${fmt(o.preco)} ${o.prazo ? `(${o.prazo} dias)` : ''}</span></label>`,
+          )
+          .join('');
+        elFreteOpcoes.querySelectorAll<HTMLInputElement>('input[name=frete]').forEach((inp) =>
+          inp.addEventListener('change', () => {
+            freteEscolhido = { nome: inp.dataset.nome!, preco: Number(inp.dataset.preco) };
+            atualizarTotais();
+          }),
+        );
+      } catch (_) {
+        elFreteMsg.textContent = 'Erro ao calcular o frete.';
+      }
+    });
+
+    document.getElementById('btn-pagar')?.addEventListener('click', async () => {
+      if (!itens().length) { elPagarMsg.textContent = 'Seu carrinho esta vazio.'; elPagarMsg.classList.remove('hidden'); return; }
+      if (!freteEscolhido) { elPagarMsg.textContent = 'Calcule e escolha o frete primeiro.'; elPagarMsg.classList.remove('hidden'); return; }
+      elPagarMsg.textContent = 'Redirecionando para o pagamento...'; elPagarMsg.classList.remove('hidden');
+      try {
+        const r = await fetch(`${PB}/lm/checkout`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ itens: paraCheckout(), frete: freteEscolhido }),
+        });
+        const data = await r.json();
+        if (r.ok && data.url) location.href = data.url;
+        else elPagarMsg.textContent = data.erro || 'Nao foi possivel iniciar o pagamento.';
+      } catch (_) {
+        elPagarMsg.textContent = 'Erro ao iniciar o pagamento.';
+      }
+    });
+
+    render();
+  }
+</script>

@@ -1,84 +1,96 @@
-# Checkout (Mercado Pago) - fundacao segura
+# Checkout (Stripe) + Frete (Melhor Envio)
 
-> Status: **FUNDACAO/TRAVAS prontas, DESLIGADO por padrao.** Nada de dinheiro
-> real ate testar no sandbox. Este documento e o passo a passo de ativacao.
+> Status: **ESTRUTURA pronta, DESLIGADO por padrao** (`checkout.ativo = false`).
+> Nada de dinheiro real ate testar no sandbox. Este doc e o passo a passo.
 
-As travas de seguranca ja estao no codigo:
+Arquitetura: o site (navegador) tem **carrinho** (localStorage) e chama o nosso
+**servidor** (PocketBase hooks) para calcular frete e criar o pagamento. As
+chaves secretas ficam SO no servidor. Travas em `pb_hooks/lm_checkout.pb.js`:
 
-1. **Preco recalculado no servidor** a partir do banco (`pb_hooks/lm_checkout.pb.js`).
-   O navegador so manda `id` e `quantidade`; quem define o preco e o servidor.
-2. **Pedidos gravados pelo servidor**; a colecao `pedidos` fica trancada para o publico.
-3. **Chave secreta** (`MP_ACCESS_TOKEN`) so em variavel de ambiente no servidor.
-4. **Confirmacao de pagamento** so via **webhook** + consulta na API do Mercado Pago.
-5. **Flag liga/desliga** (`CHECKOUT_ATIVO`) + **sandbox** primeiro.
+1. Preco recalculado no servidor pelo banco (nunca confia no navegador).
+2. Pedido/total gravados pelo servidor (colecao `pedidos` trancada).
+3. Chaves secretas so em variavel de ambiente.
+4. Pagamento so vira "pago" via webhook do Stripe (com verificacao de assinatura).
+5. So funciona com `CHECKOUT_ATIVO=true` (sandbox primeiro).
 
-## Passo 1 - Criar a colecao `pedidos` no painel
+## Passo 1 - Colecoes no painel
 
-No PocketBase (`painel...\_/`), crie a colecao **`pedidos`** (tipo Base) com os campos:
-
+### `pedidos`
 | Campo | Tipo | Observacao |
 |---|---|---|
 | `itens` | JSON | itens validados pelo servidor |
-| `total` | Number | total calculado pelo servidor |
-| `status` | Select | opcoes: `pendente`, `pago`, `cancelado`, `expirado` (max 1) |
+| `total` | Number | total (produtos + frete) |
+| `frete` | JSON | { nome, preco } |
+| `status` | Select | `pendente`, `pago`, `cancelado`, `expirado` |
 | `cliente_nome` | Plain text | opcional |
 | `cliente_contato` | Plain text | opcional |
-| `mp_preference_id` | Plain text | id da preferencia do Mercado Pago |
-| `mp_payment_id` | Plain text | id do pagamento confirmado |
+| `stripe_session_id` | Plain text | id da sessao do Stripe |
+| `stripe_payment_intent` | Plain text | id do pagamento confirmado |
 
-**API rules (MUITO importante):** deixe **List, View, Create, Update e Delete
-TODOS travados** (cadeado fechado / null). Quem grava os pedidos e o hook do
-servidor (que roda como admin), entao o cliente nunca cria/altera pedido nem total.
+**API rules:** List/View/Create/Update/Delete **TODOS travados**. Quem grava e o
+hook (roda como admin); o cliente nunca cria/altera pedido.
 
-## Passo 2 - Subir o hook do servidor
+### Campos de frete na colecao `produtos` (opcionais)
+Adicione na colecao `produtos` (se nao tiver, usa o padrao de `src/config/site.ts`):
+| Campo | Tipo | Ex. |
+|---|---|---|
+| `peso` | Number | 0.3 (kg) |
+| `altura` | Number | 10 (cm) |
+| `largura` | Number | 15 (cm) |
+| `comprimento` | Number | 20 (cm) |
 
-No VPS, coloque o arquivo `pb_hooks/lm_checkout.pb.js` (deste repositorio) em:
+## Passo 2 - Hook no servidor
+Copie `pb_hooks/lm_checkout.pb.js` (deste repo) para
+`/docker/lmstore-pocketbase/pb_hooks/lm_checkout.pb.js` no VPS. O compose ja
+monta `/pb_hooks`. Recrie o container: `docker compose up -d --force-recreate`.
 
-```
-/docker/lmstore-pocketbase/pb_hooks/lm_checkout.pb.js
-```
-
-O `docker-compose` do PocketBase ja monta `/pb_hooks` (ver
-`deploy/pocketbase-docker-compose.yml`). O PocketBase carrega os hooks ao subir.
-
-## Passo 3 - Definir os segredos (somente no servidor)
-
-Crie o arquivo `/docker/lmstore-pocketbase/.env` (NAO vai para o repositorio):
-
+## Passo 3 - Variaveis de ambiente (so no servidor)
+No `.env` em `/docker/lmstore-pocketbase/.env` (NAO vai pro repo):
 ```
 CHECKOUT_ATIVO=false
 CHECKOUT_AMBIENTE=sandbox
 CHECKOUT_MAX_QTD=20
-MP_ACCESS_TOKEN=APP_USR-...   # credencial de TESTE do Mercado Pago
-MP_WEBHOOK_SECRET=...         # segredo do webhook (painel do Mercado Pago)
-SITE_PUBLIC_URL=https://lmstore.veraxlegalops.com.br
+SITE_PUBLIC_URL=https://lojinhadamiih.com.br
+CEP_ORIGEM=18000000
+CONTATO_EMAIL=contato.lojinhadamiih@gmail.com
+# Stripe (TESTE primeiro: sk_test_... / whsec_...)
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+# Melhor Envio (token de sandbox)
+MELHOR_ENVIO_TOKEN=
 ```
 
-> A `MP_ACCESS_TOKEN` e SECRETA. Comece com a credencial de **TESTE** (sandbox).
-> Recriar o container para aplicar: `docker compose up -d --force-recreate`.
+## Passo 4 - Webhook no Stripe
+No painel do Stripe (modo teste): Developers > Webhooks > Add endpoint:
+- URL: `https://painel.lmstore.veraxlegalops.com.br/lm/stripe-webhook`
+- Evento: `checkout.session.completed`
+- Copie o **Signing secret** (`whsec_...`) para `STRIPE_WEBHOOK_SECRET`.
 
-## Passo 4 - Testar no SANDBOX (sem dinheiro real)
+## Passo 5 - Testar no SANDBOX
+1. `CHECKOUT_ATIVO=true`, ambiente `sandbox`, credenciais de teste.
+2. No site, ligar `checkout.ativo = true` em `src/config/site.ts`.
+3. Adicionar produto ao carrinho, calcular frete (CEP de teste), finalizar.
+4. Usar cartao de teste do Stripe (ex.: 4242 4242 4242 4242) e testar Pix de teste.
+5. Conferir: o pedido vira `pago` so depois do webhook. Tentar burlar preco/qtd
+   pelo navegador: tem que ser ignorado (servidor recalcula).
 
-1. No `.env`, mantenha `CHECKOUT_AMBIENTE=sandbox` e use as credenciais de TESTE.
-2. Coloque `CHECKOUT_ATIVO=true` apenas para testar.
-3. Use os **cartoes de teste** do Mercado Pago para simular aprovado/recusado.
-4. Confira: o pedido aparece em `pedidos` como `pendente` e vira `pago` apos o
-   webhook. O total tem que bater com o preco do painel (teste tentar burlar o
-   preco pelo navegador: tem que ser ignorado).
+## Passo 6 - Producao
+1. Trocar credenciais por producao (Stripe live + Melhor Envio producao, conta da loja).
+2. `CHECKOUT_AMBIENTE=producao`, `CHECKOUT_ATIVO=true`.
+3. `checkout.ativo = true` no site, publicar.
+4. Webhook de producao no Stripe (mesma URL, chave live).
+5. Compra real de valor baixo pra validar ponta a ponta.
 
-## Passo 5 - Ir para producao (so quando estiver redondo)
+## Pendencias de UI (fazer ao ligar, amanha)
+- Botao **"Adicionar ao carrinho"** na pagina do produto (`/produto`).
+- **Contador do carrinho** no header (ouve o evento `carrinho:mudou`).
+- Paginas `/pedido-confirmado` (sucesso) e ajustes visuais do carrinho.
+- Implementar a **verificacao de assinatura** do webhook (TODO no hook).
 
-1. Troque para as credenciais de **producao** do Mercado Pago no `.env`.
-2. `CHECKOUT_AMBIENTE=producao` e `CHECKOUT_ATIVO=true`.
-3. No site, ligar `checkout.ativo = true` em `src/config/site.ts` e publicar.
-4. Faca uma compra real de valor baixo para validar ponta a ponta.
-
-## Checklist de seguranca (revisar antes do go-live)
-
-- [ ] Colecao `pedidos` com TODAS as regras travadas.
-- [ ] `MP_ACCESS_TOKEN` so no `.env` do servidor (nunca no repositorio/site).
-- [ ] Webhook verificando assinatura (ver TODO no hook) e consultando a API.
-- [ ] Preco/total sempre recalculados no servidor.
-- [ ] Testado no sandbox (aprovado, recusado, e tentativa de burlar preco).
-- [ ] HTTPS ativo (ja esta).
-- [ ] 2FA ativo na conta do Mercado Pago e no painel.
+## Checklist de seguranca
+- [ ] `pedidos` com TODAS as regras travadas.
+- [ ] `STRIPE_SECRET_KEY` e `MELHOR_ENVIO_TOKEN` so no `.env` do servidor.
+- [ ] Webhook do Stripe com assinatura verificada.
+- [ ] Preco/total recalculados no servidor.
+- [ ] Testado no sandbox (aprovado, recusado, tentativa de burlar preco).
+- [ ] 2FA na conta Stripe e no painel.

@@ -98,21 +98,39 @@ export const site = {
   pocketbaseUrl: 'https://painel.lmstore.veraxlegalops.com.br',
 
   /**
-   * CHECKOUT (Mercado Pago) - travas de seguranca.
+   * CHECKOUT (Stripe) - travas de seguranca.
    *
-   * IMPORTANTE: aqui SO entram dados publicos. A chave SECRETA (access token)
-   * fica APENAS no servidor, em variavel de ambiente (MP_ACCESS_TOKEN), nunca
-   * neste arquivo nem no navegador.
+   * IMPORTANTE: aqui SO entram dados publicos. A chave SECRETA (Stripe Secret
+   * Key) fica APENAS no servidor, em variavel de ambiente (STRIPE_SECRET_KEY),
+   * nunca neste arquivo nem no navegador.
    */
   checkout: {
     /** Liga/desliga o checkout no site. Mantenha false ate validar em sandbox. */
     ativo: false,
     /** Ambiente: 'sandbox' (teste, sem dinheiro real) ou 'producao'. */
     ambiente: 'sandbox' as 'sandbox' | 'producao',
-    /** Chave PUBLICA do Mercado Pago (pode ficar no site; nao e secreta). */
-    mpPublicKey: '',
+    /** Chave PUBLICA do Stripe (pk_test_... ou pk_live_...). Nao e secreta. */
+    stripePublicKey: '',
     /** Quantidade maxima por item (trava anti-abuso). */
     maxQtdItem: 20,
+  },
+
+  /**
+   * FRETE (Melhor Envio).
+   *
+   * O token do Melhor Envio fica APENAS no servidor (MELHOR_ENVIO_TOKEN).
+   * Aqui ficam so dados publicos/operacionais.
+   */
+  frete: {
+    /** CEP de origem (de onde sai a encomenda). So digitos. */
+    cepOrigem: '18000000', // TODO: CEP real da loja em Sorocaba
+    /** Medidas/peso padrao por produto, usados se o produto nao tiver os seus. */
+    padrao: {
+      pesoKg: 0.3,
+      alturaCm: 10,
+      larguraCm: 15,
+      comprimentoCm: 20,
+    },
   },
 } as const;
 

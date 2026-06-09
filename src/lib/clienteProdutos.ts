@@ -28,6 +28,11 @@ export interface ProdutoView {
   disponivel: boolean;
   destaque: boolean;
   promocao: boolean;
+  // Dados de frete (campos opcionais no painel; caem no padrao do site).
+  pesoKg: number;
+  alturaCm: number;
+  larguraCm: number;
+  comprimentoCm: number;
 }
 
 const ROTULOS: Record<string, string> = {
@@ -92,6 +97,10 @@ function mapear(rec: any): ProdutoView {
     disponivel: !!rec.disponivel,
     destaque: !!rec.destaque,
     promocao: !!rec.promocao,
+    pesoKg: num(rec.peso) ?? site.frete.padrao.pesoKg,
+    alturaCm: num(rec.altura) ?? site.frete.padrao.alturaCm,
+    larguraCm: num(rec.largura) ?? site.frete.padrao.larguraCm,
+    comprimentoCm: num(rec.comprimento) ?? site.frete.padrao.comprimentoCm,
   };
 }
 
