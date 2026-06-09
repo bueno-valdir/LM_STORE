@@ -108,7 +108,7 @@ export const site = {
    * Instagram na home. Vazio = secao do Instagram fica escondida.
    * Ver deploy/EXTRAS.md para o passo a passo.
    */
-  beholdFeedId: '',
+  beholdFeedId: 'zZdKIoIafWpQqkTt5ekN',
 
   /** E-mail de contato (recebido via Cloudflare Email Routing, encaminhado pro Gmail). */
   email: 'contato@lojinhadamiih.com.br',
