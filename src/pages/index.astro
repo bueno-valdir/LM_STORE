@@ -6,6 +6,8 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import Selos from '../components/Selos.astro';
+import Videos from '../components/Videos.astro';
+import FeedInstagram from '../components/FeedInstagram.astro';
 import WhatsAppButton from '../components/WhatsAppButton.astro';
 import { withBase } from '../lib/url';
 ---
@@ -33,6 +35,10 @@ import { withBase } from '../lib/url';
   <p id="carrosseis-vazio" class="hidden container-loja py-12 text-center text-texto-suave">
     Em breve, novos produtos por aqui.
   </p>
+
+  <!-- VIDEOS e INSTAGRAM (aparecem se houver conteudo). -->
+  <Videos />
+  <FeedInstagram />
 
   <!-- CTA FINAL -->
   <section class="container-loja py-12">

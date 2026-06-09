@@ -9,6 +9,7 @@ on:
     branches:
       - dev
       - painel-conteudo
+      - claude/fervent-allen-VGls2
   # Permite acionar manualmente pelo botao "Run workflow" na aba Actions.
   workflow_dispatch:
 

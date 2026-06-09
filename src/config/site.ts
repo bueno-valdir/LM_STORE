@@ -87,6 +87,13 @@ export const site = {
   instagramUsuario: 'lojinhadamiih_',
   instagramUrl: 'https://instagram.com/lojinhadamiih_',
 
+  /**
+   * ID do feed do Behold.so (gratis) para mostrar os ultimos posts do
+   * Instagram na home. Vazio = secao do Instagram fica escondida.
+   * Ver deploy/EXTRAS.md para o passo a passo.
+   */
+  beholdFeedId: '',
+
   /** E-mail de contato (opcional). TODO (confirmar): preencher ou deixar vazio. */
   email: 'contato.lojinhadamiih@gmail.com',
 

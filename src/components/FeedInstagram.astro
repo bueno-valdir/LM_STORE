@@ -1,0 +1,68 @@
+---
+/**
+ * Secao "No Instagram": ultimos posts do @lojinhadamiih_ via Behold.so.
+ * Comeca escondida e so aparece se houver posts (precisa do beholdFeedId
+ * configurado em src/config/site.ts). Ver deploy/EXTRAS.md.
+ */
+import { site } from '../config/site';
+---
+
+<section id="ig-sec" class="hidden container-loja py-12">
+  <div class="mb-6 text-center">
+    <h2 class="font-titulo text-2xl font-bold text-texto">No Instagram</h2>
+    <p class="mt-1 text-texto-suave">
+      Acompanhe novidades em
+      <a href={site.instagramUrl} target="_blank" rel="noopener" class="font-semibold text-marca">
+        @{site.instagramUsuario}
+      </a>
+    </p>
+  </div>
+  <div id="ig-grid" class="grid grid-cols-3 gap-2 sm:grid-cols-4 sm:gap-3 lg:grid-cols-6"></div>
+</section>
+
+<script>
+  import { carregarInstagram } from '../lib/clienteInstagram';
+
+  // Escapa texto para uso seguro em HTML.
+  function esc(s: string): string {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  const sec = document.getElementById('ig-sec');
+  const grid = document.getElementById('ig-grid');
+
+  carregarInstagram(12)
+    .then((posts) => {
+      if (!grid || !posts.length) return;
+      grid.innerHTML = posts
+        .map(
+          (p) => `
+          <a
+            href="${esc(p.permalink)}"
+            target="_blank"
+            rel="noopener"
+            class="group relative block aspect-square overflow-hidden rounded-marca border border-fundo-borda bg-fundo-claro"
+            aria-label="Ver publicação no Instagram"
+          >
+            <img
+              src="${esc(p.img)}"
+              alt="Publicação do Instagram da Lojinha da Miih"
+              loading="lazy"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+            ${
+              p.video
+                ? `<span class="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-semibold text-white">vídeo</span>`
+                : ''
+            }
+          </a>`,
+        )
+        .join('');
+      sec?.classList.remove('hidden');
+    })
+    .catch((e) => console.error('[instagram] erro ao carregar:', e));
+</script>
