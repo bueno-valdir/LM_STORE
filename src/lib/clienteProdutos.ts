@@ -76,14 +76,25 @@ function mapear(rec: any): ProdutoView {
     src: `${PB}/api/files/produtos/${rec.id}/${a}`,
     alt: rec.nome || 'Produto',
   }));
+  const precoBase = num(rec.preco);
+  const precoPromo = num(rec.preco_promocional);
+  // O toggle 'promocao' e o interruptor MESTRE: so entra em promocao se ele
+  // estiver ligado E houver um preco promocional valido (menor que o normal).
+  // Com o toggle desligado, mostra o preco normal e ignora o preco promocional
+  // (sem etiqueta, sem preco riscado, fora da faixa e do carrossel de promocoes).
+  const emPromocao =
+    !!rec.promocao &&
+    precoPromo !== null &&
+    precoPromo > 0 &&
+    (precoBase === null || precoPromo < precoBase);
   return {
     id: rec.id,
     nome: rec.nome || '',
     marca: rec.marca || '',
     categoria: rec.categoria || rec.select || '',
     descricao: rec.descricao || '',
-    preco: num(rec.preco),
-    precoPromocional: num(rec.preco_promocional),
+    preco: precoBase,
+    precoPromocional: emPromocao ? precoPromo : null,
     tom: rec.tom || null,
     volume: rec.volume || null,
     imagens: imagens.length
@@ -91,7 +102,7 @@ function mapear(rec: any): ProdutoView {
       : [{ src: withBase('/images/products/placeholder-1.svg'), alt: rec.nome || 'Produto' }],
     disponivel: !!rec.disponivel,
     destaque: !!rec.destaque,
-    promocao: !!rec.promocao,
+    promocao: emPromocao,
   };
 }
 
