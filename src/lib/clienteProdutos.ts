@@ -169,12 +169,13 @@ export function carrosselHTML(
   produtos: ProdutoView[],
 ): string {
   if (!produtos.length) return '';
-  // Cards compactos no carrossel (banda parecida com a do banner, mostrando
-  // varios produtos). O catalogo continua usando o card no tamanho normal.
+  // Largura FIXA por card (w-[X%] + shrink-0): trava o tamanho na porcentagem
+  // mesmo com poucos produtos. Com min-w, o card incha ate o tamanho natural
+  // da imagem (foto gigante). O catalogo segue com o card normal.
   const cards = produtos
     .map(
       (p) =>
-        `<div class="min-w-[40%] snap-start sm:min-w-[26%] md:min-w-[21%] lg:min-w-[17.5%]">${cardHTML(p, { compacto: true })}</div>`,
+        `<div class="w-[42%] shrink-0 snap-start sm:w-[27%] md:w-[22%] lg:w-[18%]">${cardHTML(p, { compacto: true })}</div>`,
     )
     .join('');
   const seta = (dir: 'prev' | 'next', rotulo: string, ch: string) =>
