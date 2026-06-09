@@ -9,7 +9,7 @@
 #
 # Variaveis (Actions > Variables):
 #   DEPLOY_ENABLED -> "true" para ligar
-#   SITE_URL       -> dominio publico (ex.: https://lmstore.veraxlegalops.com.br)
+#   SITE_URL       -> dominio publico (ex.: https://lojinhadamiih.com.br)
 name: Deploy na Hostinger (VPS)
 
 on:

@@ -5,8 +5,10 @@
 #   - rede do Traefik .... n8n_default
 #   - certresolver HTTPS .. mytlschallenge (desafio TLS na porta 443)
 #
-# Importante: como o desafio e TLS na 443, o registro DNS de lmstore no
-# Cloudflare deve ser "DNS only" (nuvem cinza), igual ao n8n.
+# Importante: como o desafio e TLS na 443 (TLS-ALPN), os registros DNS de
+# lojinhadamiih.com.br e www no Cloudflare DEVEM ser "DNS only" (nuvem CINZA),
+# igual ao n8n. Com a nuvem laranja (proxy), o desafio TLS falha e o
+# certificado nao e emitido (navegador mostra "Nao seguro").
 #
 # Os arquivos do site ficam em /var/www/lmstore (no host) e o deploy do GitHub
 # joga os arquivos ali. Subir:
@@ -24,17 +26,22 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=n8n_default
-      # Roteador HTTPS.
-      - traefik.http.routers.lmstore.rule=Host(`lmstore.veraxlegalops.com.br`)
+      # Roteador HTTPS (dominio principal + www).
+      - traefik.http.routers.lmstore.rule=Host(`lojinhadamiih.com.br`) || Host(`www.lojinhadamiih.com.br`)
       - traefik.http.routers.lmstore.entrypoints=websecure
       - traefik.http.routers.lmstore.tls=true
       - traefik.http.routers.lmstore.tls.certresolver=mytlschallenge
       - traefik.http.services.lmstore.loadbalancer.server.port=80
       # Roteador HTTP que redireciona para HTTPS.
-      - traefik.http.routers.lmstore-http.rule=Host(`lmstore.veraxlegalops.com.br`)
+      - traefik.http.routers.lmstore-http.rule=Host(`lojinhadamiih.com.br`) || Host(`www.lojinhadamiih.com.br`)
       - traefik.http.routers.lmstore-http.entrypoints=web
       - traefik.http.routers.lmstore-http.middlewares=lmstore-redirect
       - traefik.http.middlewares.lmstore-redirect.redirectscheme.scheme=https
+      # Redireciona www -> dominio sem www (canonico).
+      - traefik.http.routers.lmstore.middlewares=lmstore-www
+      - traefik.http.middlewares.lmstore-www.redirectregex.regex=^https://www\.lojinhadamiih\.com\.br/(.*)
+      - traefik.http.middlewares.lmstore-www.redirectregex.replacement=https://lojinhadamiih.com.br/$${1}
+      - traefik.http.middlewares.lmstore-www.redirectregex.permanent=true
 
 networks:
   traefik:

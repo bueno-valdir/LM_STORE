@@ -94,8 +94,8 @@ export const site = {
    */
   beholdFeedId: '',
 
-  /** E-mail de contato (opcional). TODO (confirmar): preencher ou deixar vazio. */
-  email: 'contato.lojinhadamiih@gmail.com',
+  /** E-mail de contato (recebido via Cloudflare Email Routing, encaminhado pro Gmail). */
+  email: 'contato@lojinhadamiih.com.br',
 
   /**
    * Endereco do painel (PocketBase) de onde o site le os produtos.
