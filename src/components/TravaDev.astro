@@ -1,0 +1,104 @@
+---
+/**
+ * Tapume "Estamos trabalhando" + senha de acesso (temporario).
+ *
+ * Cobre o site inteiro com uma tela de "em construcao". Quem souber a senha
+ * entra e o tapume some (fica liberado no navegador via localStorage).
+ *
+ * IMPORTANTE: e uma trava LEVE (roda no navegador), so para esconder o site de
+ * visitantes casuais durante o desenvolvimento. Nao e seguranca de verdade.
+ * Liga/desliga em src/config/site.ts (travaDev.ativa).
+ */
+import { site } from '../config/site';
+
+const ativa = site.travaDev?.ativa;
+const hash = site.travaDev?.senhaHash || '';
+---
+
+{
+  ativa && (
+    <div
+      id="trava-dev"
+      data-hash={hash}
+      class="fixed inset-0 z-[9999] flex items-center justify-center bg-fundo px-6 text-center"
+    >
+      <div class="w-full max-w-md">
+        <p class="font-titulo text-3xl font-bold text-texto">{site.nome}</p>
+        <div class="mx-auto mt-3 h-1 w-16 rounded-full bg-gradiente-marca" />
+
+        <h1 class="mt-8 font-titulo text-2xl font-bold text-texto">Estamos trabalhando 💖</h1>
+        <p class="mx-auto mt-3 max-w-sm text-texto-suave">
+          Nossa lojinha online está sendo preparada com muito carinho. Volte em
+          breve para conferir as novidades!
+        </p>
+
+        <p class="mt-6 text-sm text-texto-suave">
+          Enquanto isso, fala com a gente no Instagram{' '}
+          <a href={site.instagramUrl} target="_blank" rel="noopener" class="font-semibold text-marca">
+            @{site.instagramUsuario}
+          </a>
+        </p>
+
+        <form id="trava-form" class="mx-auto mt-10 flex max-w-xs flex-col gap-2">
+          <label for="trava-senha" class="text-xs font-medium uppercase tracking-wide text-texto-suave">
+            Área restrita
+          </label>
+          <div class="flex gap-2">
+            <input
+              id="trava-senha"
+              type="password"
+              autocomplete="off"
+              placeholder="Senha"
+              class="w-full rounded-marca border border-fundo-borda bg-fundo px-3 py-2 text-texto outline-none focus:border-marca"
+            />
+            <button type="submit" class="btn-marca whitespace-nowrap px-4 py-2 text-sm">
+              Entrar
+            </button>
+          </div>
+          <p id="trava-erro" class="hidden text-sm text-marca">Senha incorreta. Tente de novo.</p>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  const el = document.getElementById('trava-dev');
+  if (el) {
+    const hashCerto = el.getAttribute('data-hash') || '';
+    const CHAVE = 'lm_acesso';
+
+    // Ja liberado neste navegador? Some na hora (sem piscar conteudo atras).
+    if (localStorage.getItem(CHAVE) === '1') {
+      el.remove();
+    } else {
+      document.documentElement.style.overflow = 'hidden';
+
+      const form = document.getElementById('trava-form') as HTMLFormElement | null;
+      const campo = document.getElementById('trava-senha') as HTMLInputElement | null;
+      const erro = document.getElementById('trava-erro');
+
+      // Calcula o SHA-256 da senha digitada para comparar com o hash.
+      async function sha256(texto: string): Promise<string> {
+        const dados = new TextEncoder().encode(texto);
+        const buf = await crypto.subtle.digest('SHA-256', dados);
+        return Array.from(new Uint8Array(buf))
+          .map((b) => b.toString(16).padStart(2, '0'))
+          .join('');
+      }
+
+      form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const tentativa = await sha256(campo?.value || '');
+        if (tentativa === hashCerto) {
+          localStorage.setItem(CHAVE, '1');
+          document.documentElement.style.overflow = '';
+          el.remove();
+        } else {
+          erro?.classList.remove('hidden');
+          if (campo) campo.value = '';
+        }
+      });
+    }
+  }
+</script>

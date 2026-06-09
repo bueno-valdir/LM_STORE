@@ -61,6 +61,22 @@ export const site = {
   emDesenvolvimento: true,
 
   /**
+   * Tapume "Estamos trabalhando" + senha de acesso (TEMPORARIO).
+   *
+   * ATENCAO: e uma trava LEVE (roda no navegador). Serve para esconder o site
+   * em construcao de visitantes casuais, NAO e seguranca de verdade (o conteudo
+   * publico ainda existe por tras). Quando lancar, basta `ativa: false`.
+   *
+   * `senhaHash`: SHA-256 da senha (a senha em si nao fica no codigo). Para
+   * trocar a senha, gere o hash: `printf 'NOVA_SENHA' | sha256sum`.
+   */
+  travaDev: {
+    ativa: true,
+    // SHA-256 de '050823'
+    senhaHash: 'e0df7f28b54b3d468f1476427b39e87dd4969571958743345e71bdc755aad2f4',
+  },
+
+  /**
    * Numero de WhatsApp no formato internacional, somente digitos.
    * Formato esperado: 55 + DDD + numero. Ex.: 5515999999999.
    *

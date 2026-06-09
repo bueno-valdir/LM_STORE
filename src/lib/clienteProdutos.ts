@@ -169,10 +169,12 @@ export function carrosselHTML(
   produtos: ProdutoView[],
 ): string {
   if (!produtos.length) return '';
+  // Cards compactos no carrossel (banda parecida com a do banner, mostrando
+  // varios produtos). O catalogo continua usando o card no tamanho normal.
   const cards = produtos
     .map(
       (p) =>
-        `<div class="min-w-[46%] snap-start sm:min-w-[31%] lg:min-w-[23%]">${cardHTML(p)}</div>`,
+        `<div class="min-w-[40%] snap-start sm:min-w-[26%] md:min-w-[21%] lg:min-w-[17.5%]">${cardHTML(p, { compacto: true })}</div>`,
     )
     .join('');
   const seta = (dir: 'prev' | 'next', rotulo: string, ch: string) =>
@@ -195,8 +197,15 @@ export function carrosselHTML(
   </section>`;
 }
 
-/** HTML de um card de produto (catalogo e destaques). */
-export function cardHTML(p: ProdutoView): string {
+/**
+ * HTML de um card de produto.
+ * - `compacto`: versao menor (usada nos carrosseis da home).
+ *
+ * Obs.: o catalogo chama `lista.map(cardHTML)`, entao o 2o argumento pode vir
+ * como indice (numero). Por isso so tratamos `opts` quando for objeto.
+ */
+export function cardHTML(p: ProdutoView, opts?: { compacto?: boolean } | number): string {
+  const compacto = typeof opts === 'object' && opts !== null ? !!opts.compacto : false;
   const { atual, de, promo } = precoVigente(p);
   const atualFmt = formatarPreco(atual);
   const deFmt = formatarPreco(de);
@@ -209,13 +218,26 @@ export function cardHTML(p: ProdutoView): string {
       ${esgotado ? '<span class="etiqueta bg-preto/80 text-white">Esgotado</span>' : ''}
     </div>`;
 
+  const precoTam = compacto ? 'text-sm' : 'text-base';
   const precoBloco =
     site.mostrarPrecos && atualFmt
-      ? `<div class="flex items-baseline gap-2">
-           <span class="font-titulo text-base font-bold text-marca">${atualFmt}</span>
+      ? `<div class="flex items-baseline gap-1.5">
+           <span class="font-titulo ${precoTam} font-bold text-marca">${atualFmt}</span>
            ${promo && deFmt ? `<span class="text-xs text-texto-suave line-through">${deFmt}</span>` : ''}
          </div>`
-      : '<span class="text-sm font-medium text-texto-suave">Consultar no WhatsApp</span>';
+      : `<span class="${compacto ? 'text-xs' : 'text-sm'} font-medium text-texto-suave">Consultar no WhatsApp</span>`;
+
+  const corpo = compacto
+    ? `<div class="flex flex-1 flex-col gap-0.5 p-2.5">
+         <span class="truncate text-[10px] uppercase tracking-wide text-texto-suave">${esc(p.marca)}</span>
+         <h3 class="line-clamp-2 font-titulo text-xs font-semibold leading-snug text-texto">${esc(p.nome)}</h3>
+         <div class="mt-auto pt-1.5">${precoBloco}</div>
+       </div>`
+    : `<div class="flex flex-1 flex-col gap-1 p-3">
+         <span class="text-xs uppercase tracking-wide text-texto-suave">${esc(p.marca)} &middot; ${esc(rotuloCategoria(p.categoria))}</span>
+         <h3 class="font-titulo text-sm font-semibold leading-snug text-texto">${esc(p.nome)}</h3>
+         <div class="mt-auto pt-2">${precoBloco}</div>
+       </div>`;
 
   return `
   <a href="${withBase('/produto')}?id=${encodeURIComponent(p.id)}"
@@ -225,10 +247,6 @@ export function cardHTML(p: ProdutoView): string {
            class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
       ${etiquetas}
     </div>
-    <div class="flex flex-1 flex-col gap-1 p-3">
-      <span class="text-xs uppercase tracking-wide text-texto-suave">${esc(p.marca)} &middot; ${esc(rotuloCategoria(p.categoria))}</span>
-      <h3 class="font-titulo text-sm font-semibold leading-snug text-texto">${esc(p.nome)}</h3>
-      <div class="mt-auto pt-2">${precoBloco}</div>
-    </div>
+    ${corpo}
   </a>`;
 }
