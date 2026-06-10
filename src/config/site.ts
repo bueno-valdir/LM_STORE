@@ -137,6 +137,22 @@ export const site = {
     /** Quantidade maxima por item (trava anti-abuso). */
     maxQtdItem: 20,
   },
+
+  /**
+   * ENTREGAS (Melhor Envio) - calculo de frete.
+   *
+   * Mesma regra de seguranca do checkout: o que e SECRETO (token do Melhor
+   * Envio) fica APENAS no servidor (variavel MELHOR_ENVIO_TOKEN). Aqui so
+   * entram dados publicos. O calculo roda no servidor (peso/dimensoes vem do
+   * banco; o navegador so manda o CEP de destino). Comece em sandbox; ligue
+   * 'ativo' apenas depois de testar. Ver deploy/ENTREGAS.md.
+   */
+  frete: {
+    /** Liga a calculadora de frete no site. Mantenha false ate testar no sandbox. */
+    ativo: false,
+    /** CEP de origem (de onde saem os envios), apenas para exibicao no site. */
+    cepOrigem: '',
+  },
 } as const;
 
 export type SiteConfig = typeof site;

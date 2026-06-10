@@ -36,11 +36,75 @@ import { withBase } from '../lib/url';
     esc,
     type ProdutoView,
   } from '../lib/clienteProdutos';
+  import { calcularFrete, cepValido, formatarCep } from '../lib/clienteFrete';
+  import { site } from '../config/site';
 
   const detalhe = document.getElementById('detalhe')!;
   const carregando = document.getElementById('carregando');
   const naoEncontrado = document.getElementById('nao-encontrado');
   const trilhaNome = document.getElementById('trilha-nome');
+
+  // Bloco da calculadora de frete (so aparece se estiver ligada na config).
+  function freteHTML(): string {
+    if (!site.frete.ativo) return '';
+    const origem = site.frete.cepOrigem
+      ? `<p class="mt-1 text-xs text-texto-suave">Enviamos de ${esc(site.cidade)}.</p>`
+      : '';
+    return `
+      <div class="mt-6 rounded-marca border border-fundo-borda p-4">
+        <p class="font-titulo text-sm font-semibold text-texto">Calcular frete e prazo</p>
+        <form id="frete-form" class="mt-2 flex gap-2">
+          <input id="frete-cep" inputmode="numeric" maxlength="9" placeholder="Seu CEP"
+                 class="w-full rounded-marca border border-fundo-borda px-3 py-2 outline-none focus:border-marca" />
+          <button type="submit" class="btn-marca whitespace-nowrap px-4 py-2 text-sm">Calcular</button>
+        </form>
+        ${origem}
+        <div id="frete-resultado" class="mt-3 text-sm"></div>
+      </div>`;
+  }
+
+  // Liga a calculadora de frete (CEP -> opcoes dos Correios).
+  function ligarFrete(produtoId: string) {
+    const form = document.getElementById('frete-form') as HTMLFormElement | null;
+    const campo = document.getElementById('frete-cep') as HTMLInputElement | null;
+    const saida = document.getElementById('frete-resultado');
+    if (!form || !campo || !saida) return;
+
+    campo.addEventListener('input', () => {
+      campo.value = formatarCep(campo.value);
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!cepValido(campo.value)) {
+        saida.innerHTML = '<p class="text-marca">Digite um CEP válido (8 dígitos).</p>';
+        return;
+      }
+      saida.innerHTML = '<p class="text-texto-suave">Calculando...</p>';
+      try {
+        const opcoes = await calcularFrete(produtoId, campo.value, 1);
+        if (!opcoes.length) {
+          saida.innerHTML = '<p class="text-texto-suave">Sem opções de envio para este CEP.</p>';
+          return;
+        }
+        saida.innerHTML = `
+          <ul class="divide-y divide-fundo-borda rounded-marca border border-fundo-borda">
+            ${opcoes
+              .map(
+                (o) => `
+              <li class="flex items-center justify-between gap-3 px-3 py-2">
+                <span class="text-texto">${esc(o.nome)}<span class="block text-xs text-texto-suave">até ${o.prazo} dia(s) útil(eis)</span></span>
+                <span class="font-titulo font-semibold text-marca">${formatarPreco(o.preco)}</span>
+              </li>`,
+              )
+              .join('')}
+          </ul>
+          <p class="mt-2 text-xs text-texto-suave">Prazo a partir da postagem. O pagamento online chega em breve; por enquanto, finalize pelo WhatsApp.</p>`;
+      } catch (err: any) {
+        saida.innerHTML = `<p class="text-marca">${esc(err?.message || 'Erro ao calcular o frete.')}</p>`;
+      }
+    });
+  }
 
   function render(p: ProdutoView) {
     const { atual, de, promo } = precoVigente(p);
@@ -104,6 +168,8 @@ import { withBase } from '../lib/url';
             </a>
             <p class="mt-2 text-xs text-texto-suave">Você será levada ao WhatsApp com a mensagem do produto já preenchida.</p>
           </div>
+
+          ${freteHTML()}
         </section>
       </div>`;
 
@@ -116,6 +182,9 @@ import { withBase } from '../lib/url';
         principal.alt = botao.dataset.alt ?? principal.alt;
       });
     });
+
+    // Liga a calculadora de frete (se estiver ativa).
+    if (site.frete.ativo) ligarFrete(p.id);
   }
 
   async function iniciar() {
