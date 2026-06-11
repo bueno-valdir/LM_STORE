@@ -139,13 +139,13 @@ export const site = {
   },
 
   /**
-   * ENTREGAS (Melhor Envio) - calculo de frete.
+   * ENTREGAS (SuperFrete) - calculo de frete.
    *
-   * Mesma regra de seguranca do checkout: o que e SECRETO (token do Melhor
-   * Envio) fica APENAS no servidor (variavel MELHOR_ENVIO_TOKEN). Aqui so
-   * entram dados publicos. O calculo roda no servidor (peso/dimensoes vem do
-   * banco; o navegador so manda o CEP de destino). Comece em sandbox; ligue
-   * 'ativo' apenas depois de testar. Ver deploy/ENTREGAS.md.
+   * Mesma regra de seguranca do checkout: o que e SECRETO (token do SuperFrete)
+   * fica APENAS no servidor (variavel SUPERFRETE_TOKEN). Aqui so entram dados
+   * publicos. O calculo roda no servidor (peso/dimensoes vem do banco; o
+   * navegador so manda o CEP de destino). Comece em sandbox; ligue 'ativo'
+   * apenas depois de testar. Ver deploy/ENTREGAS.md.
    */
   frete: {
     /** Liga a calculadora de frete no site. Mantenha false ate testar no sandbox. */
