@@ -1,0 +1,3 @@
+nome,marca,categoria,preco,preco_promocional,tom,volume,descricao,peso_g,altura_cm,largura_cm,comprimento_cm,estoque,estoque_tons,destaque,promocao,disponivel,imagens
+Base Líquida Matte Alta Cobertura,Payot,base,49.90,,3,30ml,"Base líquida matte com alta cobertura, disfarça imperfeições e uniformiza o tom da pele.",120,12,4,4,,5|0|2,sim,nao,sim,https://exemplo.com/base-frente.jpg|https://exemplo.com/base-verso.jpg
+Sérum Facial Vitamina C,Eudora,serum-tratamentos,79.90,69.90,0,30ml,"Sérum antioxidante com vitamina C para viço e uniformização.",110,10,4,4,8,,nao,sim,sim,https://exemplo.com/serum.jpg
