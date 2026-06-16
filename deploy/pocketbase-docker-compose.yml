@@ -47,6 +47,18 @@ services:
       - MP_ACCESS_TOKEN=${MP_ACCESS_TOKEN:-}
       - MP_WEBHOOK_SECRET=${MP_WEBHOOK_SECRET:-}
       - SITE_PUBLIC_URL=${SITE_PUBLIC_URL:-https://lmstore.veraxlegalops.com.br}
+      # Frete (SuperFrete). Segredos no .env (NAO vao para o repositorio).
+      # Ex. de .env:
+      #   FRETE_ATIVO=true
+      #   SUPERFRETE_AMBIENTE=sandbox
+      #   SUPERFRETE_TOKEN=...      (SECRETO, so no servidor)
+      #   CEP_ORIGEM=18000000
+      - FRETE_ATIVO=${FRETE_ATIVO:-false}
+      - SUPERFRETE_AMBIENTE=${SUPERFRETE_AMBIENTE:-sandbox}
+      - SUPERFRETE_TOKEN=${SUPERFRETE_TOKEN:-}
+      - CEP_ORIGEM=${CEP_ORIGEM:-}
+      - FRETE_MANUSEIO_DIAS=${FRETE_MANUSEIO_DIAS:-1}
+      - FRETE_MAX_QTD=${FRETE_MAX_QTD:-20}
     networks:
       - traefik
     labels:
