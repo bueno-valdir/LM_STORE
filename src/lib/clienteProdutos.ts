@@ -46,16 +46,33 @@ export function esc(s: string): string {
 }
 
 /**
+ * Decodifica entidades HTML (&iacute; -> í, &ccedil; -> ç, &amp; -> &, ...).
+ * Usa o proprio navegador (via textarea) para cobrir todas as entidades
+ * nomeadas e numericas. Seguro: as tags ja foram removidas antes, e a saida
+ * passa por `esc()` ao ser inserida no HTML.
+ */
+function decodificarEntidades(s: string): string {
+  if (!s) return '';
+  if (typeof document === 'undefined') {
+    // Fallback minimo (build/SSR, sem DOM): cobre os casos mais comuns.
+    return s.replace(/&nbsp;/gi, ' ').replace(/&amp;/gi, '&');
+  }
+  const ta = document.createElement('textarea');
+  ta.innerHTML = s;
+  return ta.value;
+}
+
+/**
  * Converte o HTML da descricao (campo do painel pode vir com <p>, <br>, etc.)
- * em texto simples, preservando quebras de linha. Remove qualquer tag, o que
- * tambem evita injecao de HTML/script vindo do conteudo.
+ * em texto simples, preservando quebras de linha. Remove qualquer tag (o que
+ * tambem evita injecao de HTML/script) e so depois decodifica as entidades.
  */
 export function textoSimples(html: string): string {
-  return (html || '')
+  const semTags = (html || '')
     .replace(/<\s*br\s*\/?>/gi, '\n')
     .replace(/<\/(p|div|li|h[1-6])>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/gi, ' ')
+    .replace(/<[^>]+>/g, '');
+  return decodificarEntidades(semTags)
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
