@@ -23,7 +23,11 @@ export interface ProdutoView {
   descricao: string;
   preco: number | null;
   precoPromocional: number | null;
-  tom: string | null;
+  /**
+   * Quantidade de tons (numeros) que o produto tem. 0 = sem tom (campo oculto).
+   * N (1..10) = disponivel nos tons 1 a N (cliente escolhe na pagina).
+   */
+  tons: number;
   volume: string | null;
   imagens: { src: string; alt: string }[];
   disponivel: boolean;
@@ -35,6 +39,13 @@ function num(v: unknown): number | null {
   if (v === '' || v === null || v === undefined) return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
+}
+
+/** Normaliza a quantidade de tons para um inteiro entre 0 e 10. */
+function qtdTons(v: unknown): number {
+  const n = num(v);
+  if (n === null) return 0;
+  return Math.max(0, Math.min(10, Math.round(n)));
 }
 
 /** Escapa texto para inserir com seguranca no HTML. */
@@ -107,7 +118,7 @@ function mapear(rec: any): ProdutoView {
     descricao: rec.descricao || '',
     preco: precoBase,
     precoPromocional: emPromocao ? precoPromo : null,
-    tom: rec.tom || null,
+    tons: qtdTons(rec.tom),
     volume: rec.volume || null,
     imagens: imagens.length
       ? imagens
@@ -172,9 +183,9 @@ export function precoVigente(p: ProdutoView) {
 }
 
 /** Monta o link wa.me com a mensagem do produto. */
-export function linkWhatsApp(p: ProdutoView): string {
+export function linkWhatsApp(p: ProdutoView, tomEscolhido?: number): string {
   const partes = [`Olá! Tenho interesse no produto: ${p.nome} (${p.id})`];
-  if (p.tom) partes.push(`, tom ${p.tom}`);
+  if (tomEscolhido && tomEscolhido >= 1) partes.push(`, tom ${tomEscolhido}`);
   const { atual } = precoVigente(p);
   const precoFmt = formatarPreco(atual);
   if (precoFmt) partes.push(` - ${precoFmt}`);

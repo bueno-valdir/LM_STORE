@@ -70,9 +70,21 @@ import { withBase } from '../lib/url';
       : '<span class="text-lg font-medium text-texto-suave">Consulte o valor no WhatsApp</span>';
 
     const atributos = [
-      p.tom ? `<div class="flex gap-2"><dt class="font-semibold text-texto">Tom:</dt><dd>${esc(p.tom)}</dd></div>` : '',
       p.volume ? `<div class="flex gap-2"><dt class="font-semibold text-texto">Volume:</dt><dd>${esc(p.volume)}</dd></div>` : '',
     ].join('');
+
+    // Seletor de tom: aparece so quando o produto tem 1 ou mais tons.
+    const tomBloco =
+      p.tons >= 1
+        ? `<div class="mt-5">
+             <label for="tom-select" class="block text-sm font-semibold text-texto">Escolha o tom</label>
+             <select id="tom-select" class="mt-1 w-full max-w-xs rounded-marca border border-fundo-borda bg-fundo px-3 py-2 text-sm text-texto focus-visible:border-marca">
+               ${Array.from({ length: p.tons }, (_, i) => i + 1)
+                 .map((n) => `<option value="${n}">Tom ${n}</option>`)
+                 .join('')}
+             </select>
+           </div>`
+        : '';
 
     detalhe.innerHTML = `
       <div class="grid gap-8 md:grid-cols-2">
@@ -96,16 +108,27 @@ import { withBase } from '../lib/url';
 
           <dl class="mt-4 space-y-1 text-sm text-texto-suave">${atributos}</dl>
 
+          ${tomBloco}
+
           <p class="mt-5 whitespace-pre-line leading-relaxed text-texto-suave">${esc(textoSimples(p.descricao))}</p>
 
           <div class="mt-6">
-            <a href="${esc(linkWhatsApp(p))}" target="_blank" rel="noopener" class="btn-marca">
+            <a id="btn-wpp" href="${esc(linkWhatsApp(p, p.tons >= 1 ? 1 : undefined))}" target="_blank" rel="noopener" class="btn-marca">
               ${esgotado ? 'Avise-me / Pedir mesmo assim' : 'Pedir no WhatsApp'}
             </a>
             <p class="mt-2 text-xs text-texto-suave">Você será levada ao WhatsApp com a mensagem do produto já preenchida.</p>
           </div>
         </section>
       </div>`;
+
+    // Ao trocar o tom, atualiza a mensagem do WhatsApp com o tom escolhido.
+    const tomSelect = document.getElementById('tom-select') as HTMLSelectElement | null;
+    const btnWpp = document.getElementById('btn-wpp') as HTMLAnchorElement | null;
+    if (tomSelect && btnWpp) {
+      tomSelect.addEventListener('change', () => {
+        btnWpp.href = linkWhatsApp(p, Number(tomSelect.value));
+      });
+    }
 
     // Troca a imagem principal ao clicar numa miniatura.
     const principal = document.getElementById('imagem-principal') as HTMLImageElement | null;

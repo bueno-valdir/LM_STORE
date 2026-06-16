@@ -35,6 +35,46 @@ capa; as demais aparecem como miniaturas clicáveis na página do produto.
 
 ---
 
+## 1.1) Campo `tom` (tons numerados: 0 a 10)
+
+Alguns produtos (ex.: base) vendem em tons numerados (Tom 1, Tom 2, ...). O
+campo **`tom`** controla isso com um numero de **0 a 10**:
+
+- **0** → o produto **não tem tom** (o seletor de tom fica escondido na página).
+- **1** → aparece só o **Tom 1**.
+- **2** → aparecem os tons **1 e 2**.
+- **N** → aparecem os tons **1 até N** (até 10).
+
+Na página do produto, o cliente escolhe o tom num seletor, e a mensagem do
+WhatsApp já vai com o tom escolhido (ex.: "..., tom 3").
+
+Como configurar no painel:
+
+1. Em **Collections** → **`produtos`** → editar a coleção.
+2. O campo **`tom`** deve ser do tipo **Number** (numérico).
+3. Em **Min**, coloque `0`; em **Max**, coloque `10` (e marque "No decimals",
+   se houver, para aceitar só inteiros).
+4. **Save changes.**
+
+> Se hoje o `tom` for tipo **Plain text**, troque para **Number** (na fase de
+> desenvolvimento, sem produtos reais, é seguro). Ao cadastrar, basta digitar o
+> número de tons (ou `0`/vazio para esconder).
+
+## 1.2) Campos de peso e tamanho (para o frete)
+
+Para o cálculo de frete (quando ligarmos o envio), cada produto precisa de peso
+e dimensões da embalagem. Crie estes campos (tipo **Number**) na coleção
+`produtos` — pode deixar vazios por enquanto:
+
+| Campo | Tipo | Unidade | Observação |
+|---|---|---|---|
+| `peso_g` | Number | gramas | peso do produto com embalagem |
+| `altura_cm` | Number | cm | altura da embalagem |
+| `largura_cm` | Number | cm | largura da embalagem |
+| `comprimento_cm` | Number | cm | comprimento da embalagem |
+
+Esses campos **não aparecem** para o cliente no site — servem só para o frete.
+
 ## 2) Categorias e subcategorias
 
 O catálogo agora usa **categoria → subcategoria** (ex.: Rosto → Base). No painel,
