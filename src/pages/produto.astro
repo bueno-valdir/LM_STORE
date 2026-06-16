@@ -74,13 +74,20 @@ import { withBase } from '../lib/url';
     ].join('');
 
     // Seletor de tom: aparece so quando o produto tem 1 ou mais tons.
+    // Tons sem estoque ficam desabilitados; comeca no primeiro tom disponivel.
+    const tomDisponivel = (n: number) => !p.estoqueTons || (p.estoqueTons[n - 1] ?? 0) > 0;
+    const tonsLista = Array.from({ length: p.tons }, (_, i) => i + 1);
+    const primeiroTom = tonsLista.find(tomDisponivel) ?? 1;
     const tomBloco =
       p.tons >= 1
         ? `<div class="mt-5">
              <label for="tom-select" class="block text-sm font-semibold text-texto">Escolha o tom</label>
              <select id="tom-select" class="mt-1 w-full max-w-xs rounded-marca border border-fundo-borda bg-fundo px-3 py-2 text-sm text-texto focus-visible:border-marca">
-               ${Array.from({ length: p.tons }, (_, i) => i + 1)
-                 .map((n) => `<option value="${n}">Tom ${n}</option>`)
+               ${tonsLista
+                 .map((n) => {
+                   const ok = tomDisponivel(n);
+                   return `<option value="${n}"${n === primeiroTom ? ' selected' : ''}${ok ? '' : ' disabled'}>Tom ${n}${ok ? '' : ' (esgotado)'}</option>`;
+                 })
                  .join('')}
              </select>
            </div>`
@@ -113,7 +120,7 @@ import { withBase } from '../lib/url';
           <p class="mt-5 whitespace-pre-line leading-relaxed text-texto-suave">${esc(textoSimples(p.descricao))}</p>
 
           <div class="mt-6">
-            <a id="btn-wpp" href="${esc(linkWhatsApp(p, p.tons >= 1 ? 1 : undefined))}" target="_blank" rel="noopener" class="btn-marca">
+            <a id="btn-wpp" href="${esc(linkWhatsApp(p, p.tons >= 1 ? primeiroTom : undefined))}" target="_blank" rel="noopener" class="btn-marca">
               ${esgotado ? 'Avise-me / Pedir mesmo assim' : 'Pedir no WhatsApp'}
             </a>
             <p class="mt-2 text-xs text-texto-suave">Você será levada ao WhatsApp com a mensagem do produto já preenchida.</p>

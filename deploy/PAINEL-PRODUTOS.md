@@ -75,6 +75,36 @@ e dimensões da embalagem. Crie estes campos (tipo **Number**) na coleção
 
 Esses campos **não aparecem** para o cliente no site — servem só para o frete.
 
+## 1.3) Estoque (unidades) — reflete no site
+
+O estoque controla a disponibilidade automaticamente:
+
+- Produto **sem tom** (`tom` = 0): use o campo **`estoque`** (Number). Quando
+  chega a `0`, o site marca **Esgotado** sozinho.
+- Produto **com tons** (`tom` >= 1): use o campo **`estoque_tons`** (JSON), com
+  as unidades de cada tom, na ordem. Exemplos:
+  - `[5, 0, 2]` → Tom 1 tem 5, Tom 2 esgotado, Tom 3 tem 2.
+  - o tom esgotado aparece desabilitado no seletor; se **todos** zerarem, o
+    produto inteiro vira **Esgotado**.
+
+Campos a criar na coleção `produtos`:
+
+| Campo | Tipo | Observação |
+|---|---|---|
+| `estoque` | Number | unidades de produtos SEM tom |
+| `estoque_tons` | JSON | lista de unidades por tom, ex.: `[5, 0, 2]` |
+
+Regras importantes:
+
+- **Não preenchido = não controla.** Se deixar `estoque`/`estoque_tons` vazios,
+  o site ignora o estoque e usa só o toggle **`disponivel`** (como antes). Assim
+  nada quebra enquanto você não cadastra as quantidades.
+- O toggle **`disponivel`** continua mandando: se você desligar, fica esgotado
+  mesmo que haja estoque.
+- Esses números **não aparecem** para o cliente (uso interno). Observação
+  técnica: como a API de leitura é pública, o valor existe no retorno da API
+  (não fica exposto na tela, mas não é segredo absoluto).
+
 ## 2) Categorias e subcategorias
 
 O catálogo agora usa **categoria → subcategoria** (ex.: Rosto → Base). No painel,

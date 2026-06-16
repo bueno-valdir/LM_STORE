@@ -28,6 +28,15 @@ export interface ProdutoView {
    * N (1..10) = disponivel nos tons 1 a N (cliente escolhe na pagina).
    */
   tons: number;
+  /**
+   * Estoque por tom (apenas produtos com tons). Indice 0 = Tom 1, etc.
+   * null = estoque nao controlado para este produto (usa o toggle 'disponivel').
+   */
+  estoqueTons: number[] | null;
+  /**
+   * Estoque de produtos SEM tom. null = nao controlado (usa 'disponivel').
+   */
+  estoque: number | null;
   volume: string | null;
   imagens: { src: string; alt: string }[];
   disponivel: boolean;
@@ -46,6 +55,39 @@ function qtdTons(v: unknown): number {
   const n = num(v);
   if (n === null) return 0;
   return Math.max(0, Math.min(10, Math.round(n)));
+}
+
+/**
+ * Le o estoque por tom do registro do painel. Aceita varios formatos:
+ *  - array JSON: [5, 0, 2]
+ *  - objeto JSON: { "1": 5, "2": 0, "3": 2 }
+ *  - texto: "5|0|2" ou "5,0,2"
+ * Retorna um array com 'tons' posicoes (preenchido com 0) ou null quando o
+ * estoque nao foi informado (= nao controlado).
+ */
+function parseEstoqueTons(v: unknown, tons: number): number[] | null {
+  if (tons < 1 || v === null || v === undefined || v === '') return null;
+  let bruto: unknown = v;
+  if (typeof bruto === 'string') {
+    const txt = bruto.trim();
+    if (!txt) return null;
+    try {
+      bruto = JSON.parse(txt);
+    } catch {
+      bruto = txt.split(/[,;|]/).map((x) => x.trim());
+    }
+  }
+  let arr: number[];
+  if (Array.isArray(bruto)) {
+    arr = bruto.map((x) => num(x) ?? 0);
+  } else if (typeof bruto === 'object' && bruto !== null) {
+    const obj = bruto as Record<string, unknown>;
+    arr = Array.from({ length: tons }, (_, i) => num(obj[String(i + 1)]) ?? 0);
+  } else {
+    return null;
+  }
+  // Ajusta o tamanho para a quantidade de tons (sobra ignorada, falta = 0).
+  return Array.from({ length: tons }, (_, i) => Math.max(0, arr[i] ?? 0));
 }
 
 /** Escapa texto para inserir com seguranca no HTML. */
@@ -110,6 +152,20 @@ function mapear(rec: any): ProdutoView {
     precoPromo !== null &&
     precoPromo > 0 &&
     (precoBase === null || precoPromo < precoBase);
+
+  // Estoque: reflete no site. Se NAO for informado, fica null (nao controla) e
+  // a disponibilidade segue apenas o toggle 'disponivel' do painel.
+  const tons = qtdTons(rec.tom);
+  const estoqueTons = parseEstoqueTons(rec.estoque_tons, tons);
+  const estoque = tons >= 1 ? null : num(rec.estoque);
+  const disponivelManual = !!rec.disponivel;
+  let disponivel = disponivelManual;
+  if (estoqueTons) {
+    disponivel = disponivelManual && estoqueTons.some((n) => n > 0);
+  } else if (estoque !== null) {
+    disponivel = disponivelManual && estoque > 0;
+  }
+
   return {
     id: rec.id,
     nome: rec.nome || '',
@@ -118,12 +174,14 @@ function mapear(rec: any): ProdutoView {
     descricao: rec.descricao || '',
     preco: precoBase,
     precoPromocional: emPromocao ? precoPromo : null,
-    tons: qtdTons(rec.tom),
+    tons,
+    estoqueTons,
+    estoque,
     volume: rec.volume || null,
     imagens: imagens.length
       ? imagens
       : [{ src: withBase('/images/products/placeholder-1.svg'), alt: rec.nome || 'Produto' }],
-    disponivel: !!rec.disponivel,
+    disponivel,
     destaque: !!rec.destaque,
     promocao: emPromocao,
   };
