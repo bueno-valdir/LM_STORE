@@ -16,14 +16,30 @@ painel — só cria os produtos respeitando o schema atual.
 ## Passo a passo
 
 ### 1) Preencha a planilha
-Use o modelo **`scripts/modelo-produtos.csv`** (abra no Google Sheets ou Excel).
+Use o modelo **`deploy/modelo-produtos.xlsx`** (abra no Excel ou suba no Google
+Sheets com **Arquivo → Importar**). Ele já vem com **listas suspensas** nos
+campos de valor fixo, então a cliente só escolhe a opção (não precisa decorar
+código):
+
+- **categoria** → escolhe o nome amigável (ex.: *Base*, *Sérum / Tratamentos*);
+  a importação converte para o código interno sozinha.
+- **tom** → 0 a 10.
+- **destaque / promocao / disponivel** → sim / nao.
+
+A aba **Instruções** explica tudo, e as 2 primeiras linhas são exemplos (apague
+antes de importar). Há também um modelo em CSV puro (`scripts/modelo-produtos.csv`)
+para quem preferir.
+
+> Para regenerar o `.xlsx` (se mudarem as categorias):
+> `python3 scripts/gerar-planilha-modelo.py`
+
 Cada linha é um produto. Colunas:
 
 | Coluna | O que é | Exemplo |
 |---|---|---|
 | `nome` | nome do produto | Base Líquida Matte |
 | `marca` | marca (escreva sempre igual) | Payot |
-| `categoria` | **slug** da subcategoria | base |
+| `categoria` | nome da subcategoria (lista suspensa) | Base |
 | `preco` | preço normal | 49.90 |
 | `preco_promocional` | preço em promoção (ou vazio) | 39.90 |
 | `tom` | nº de tons (0 = sem tom; N = tons 1..N) | 3 |
@@ -39,8 +55,9 @@ Cada linha é um produto. Colunas:
 | `imagens` | URLs das fotos, separadas por `\|` | https://.../1.jpg\|https://.../2.jpg |
 
 Dicas:
-- **categoria**: use os slugs da lista em `deploy/PAINEL-PRODUTOS.md` (ex.: `base`,
-  `batom`, `sombras`). O script avisa se digitar um slug que não existe.
+- **categoria**: escolha pela lista suspensa da planilha. (No CSV puro também
+  funciona digitar o slug, ex.: `base`.) O script avisa se a categoria não for
+  reconhecida.
 - **fotos por link**: as URLs precisam ser **públicas** (abrir direto no navegador
   e mostrar a imagem). A primeira vira a capa.
 - Deixe `estoque`/`estoque_tons` vazios se não quiser controlar estoque agora.

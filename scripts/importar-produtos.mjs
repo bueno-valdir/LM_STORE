@@ -58,17 +58,38 @@ if (!dryRun && (!PB_ADMIN_EMAIL || !PB_ADMIN_SENHA)) {
   sair('Defina PB_ADMIN_EMAIL e PB_ADMIN_SENHA (login de admin do painel). Use --dry-run para testar sem gravar.');
 }
 
-// ---------- validacao de categorias (le os slugs do codigo) ----------
-function slugsValidos() {
+// ---------- categorias (le src/config/categorias.ts) ----------
+const SLUGS_RAIZ = new Set(['rosto', 'olhos', 'labios', 'sobrancelhas', 'skincare', 'pinceis', 'acessorios']);
+
+function normalizar(s) {
+  return String(s || '')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '') // tira acentos
+    .toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Monta um resolvedor de categoria: aceita o SLUG (ex.: base) ou o NOME amigavel
+ * da subcategoria (ex.: "Sérum / Tratamentos") e devolve sempre o slug.
+ */
+function montarResolvedorCategoria() {
+  let pares = [];
   try {
-    const arq = resolve(__dirname, '../src/config/categorias.ts');
-    const txt = readFileSync(arq, 'utf8');
-    const set = new Set();
-    for (const m of txt.matchAll(/slug:\s*'([a-z0-9-]+)'/g)) set.add(m[1]);
-    return set;
+    const txt = readFileSync(resolve(__dirname, '../src/config/categorias.ts'), 'utf8');
+    pares = [...txt.matchAll(/slug:\s*'([a-z0-9-]+)',\s*rotulo:\s*'([^']+)'/g)]
+      .map((m) => ({ slug: m[1], rotulo: m[2] }))
+      .filter((p) => !SLUGS_RAIZ.has(p.slug));
   } catch {
-    return null; // sem validacao se nao achar o arquivo
+    return (v) => ({ slug: v, ok: true }); // sem validacao se nao achar o arquivo
   }
+  const porSlug = new Set(pares.map((p) => p.slug));
+  const porNome = new Map(pares.map((p) => [normalizar(p.rotulo), p.slug]));
+  return (v) => {
+    const t = String(v || '').trim();
+    if (!t) return { slug: '', ok: true };
+    if (porSlug.has(t)) return { slug: t, ok: true };
+    const achado = porNome.get(normalizar(t));
+    return achado ? { slug: achado, ok: true } : { slug: t, ok: false };
+  };
 }
 
 // ---------- parser CSV (RFC4180: aspas, virgulas e quebras dentro de aspas) ----------
@@ -190,7 +211,7 @@ async function principal() {
     return i >= 0 ? (linha[i] ?? '').trim() : '';
   };
 
-  const validos = slugsValidos();
+  const resolverCategoria = montarResolvedorCategoria();
   const token = dryRun ? null : await autenticar();
 
   let ok = 0;
@@ -202,10 +223,12 @@ async function principal() {
     const nome = col(linha, 'nome');
     if (!nome) { console.warn(`  linha ${r + 1}: sem nome, pulando.`); continue; }
 
-    const categoria = col(linha, 'categoria');
-    if (validos && categoria && !validos.has(categoria)) {
-      console.warn(`  [aviso] linha ${r + 1} (${nome}): categoria "${categoria}" nao esta na lista de slugs. Confira.`);
+    const catBruta = col(linha, 'categoria');
+    const cat = resolverCategoria(catBruta);
+    if (catBruta && !cat.ok) {
+      console.warn(`  [aviso] linha ${r + 1} (${nome}): categoria "${catBruta}" nao reconhecida. Confira o nome.`);
     }
+    const categoria = cat.slug;
 
     const dados = {
       nome,
