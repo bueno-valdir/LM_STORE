@@ -9,6 +9,7 @@
  * proposito, para o Tailwind incluir elas no CSS final.
  */
 import { site } from '../config/site';
+import { rotuloDe } from '../config/categorias';
 import { withBase } from './url';
 
 const PB = (site.pocketbaseUrl || '').replace(/\/$/, '');
@@ -29,12 +30,6 @@ export interface ProdutoView {
   destaque: boolean;
   promocao: boolean;
 }
-
-const ROTULOS: Record<string, string> = {
-  maquiagem: 'Maquiagem',
-  skincare: 'Skincare',
-  'kits-presentes': 'Kits e Presentes',
-};
 
 function num(v: unknown): number | null {
   if (v === '' || v === null || v === undefined) return null;
@@ -144,7 +139,7 @@ export async function carregarProduto(id: string): Promise<ProdutoView | null> {
 }
 
 export function rotuloCategoria(slug: string): string {
-  return ROTULOS[slug] || slug || '';
+  return rotuloDe(slug);
 }
 
 export function formatarPreco(v: number | null): string | null {

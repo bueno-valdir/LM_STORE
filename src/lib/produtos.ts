@@ -5,19 +5,11 @@
  * src/lib/clienteProdutos.ts. Este arquivo mantem apenas os utilitarios que
  * tambem sao usados no build (ex.: pela montagem da mensagem do WhatsApp).
  */
-import type { Produto, Categoria, CategoriaInfo } from './types';
+import type { Produto } from './types';
 
-/** Lista de categorias e seus rotulos amigaveis (ordem de exibicao). */
-export const categorias: CategoriaInfo[] = [
-  { slug: 'maquiagem', rotulo: 'Maquiagem' },
-  { slug: 'skincare', rotulo: 'Skincare' },
-  { slug: 'kits-presentes', rotulo: 'Kits e Presentes' },
-];
-
-/** Retorna o rotulo amigavel de uma categoria. */
-export function rotuloCategoria(slug: Categoria): string {
-  return categorias.find((c) => c.slug === slug)?.rotulo ?? slug;
-}
+// As categorias/subcategorias e seus rotulos ficam em src/config/categorias.ts.
+// No runtime do site, o rotulo amigavel vem de `rotuloCategoria` em
+// src/lib/clienteProdutos.ts (que usa aquela arvore).
 
 /**
  * Define qual preco esta valendo (promocional quando existir) e o preco "de".

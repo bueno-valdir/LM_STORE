@@ -1,8 +1,14 @@
 ---
 /**
- * Catalogo: grade de produtos com filtro por categoria e atalho para promocoes.
- * Os produtos sao lidos do painel (PocketBase) pelo navegador, e os filtros
- * sao montados a partir das categorias que existem de verdade nos produtos.
+ * Catalogo: grade de produtos com filtros por categoria, subcategoria, marca e
+ * promocoes. Os produtos sao lidos do painel (PocketBase) pelo navegador.
+ *
+ * Filtros via URL:
+ *   ?cat=rosto      -> categoria-mae (mostra tambem as subcategorias dela)
+ *   ?sub=base       -> subcategoria especifica
+ *   ?marca=Eudora   -> por marca
+ *   ?q=texto        -> busca por nome/marca
+ *   #promocoes      -> abre ja filtrando promocoes
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
@@ -35,8 +41,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </div>
 
-    <!-- Barra de filtros (preenchida pelo navegador). Ancora #promocoes. -->
-    <div id="promocoes" class="mb-6 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar produtos"></div>
+    <!-- Barra de filtros principais (categorias). Ancora #promocoes. -->
+    <div id="promocoes" class="mb-3 flex flex-wrap gap-2" role="tablist" aria-label="Filtrar por categoria"></div>
+
+    <!-- Barra de subcategorias (aparece quando uma categoria esta selecionada). -->
+    <div id="subfiltros" class="mb-6 flex flex-wrap gap-2"></div>
 
     <!-- Grade de produtos (preenchida pelo navegador). -->
     <div id="grade" class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4"></div>
@@ -53,10 +62,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <script>
-  import { carregarProdutos, cardHTML, rotuloCategoria, esc, type ProdutoView } from '../lib/clienteProdutos';
+  import { carregarProdutos, cardHTML, esc, type ProdutoView } from '../lib/clienteProdutos';
+  import { arvoreCategorias, categoriaMaeDe, rotuloDe } from '../config/categorias';
 
   const grade = document.getElementById('grade')!;
   const barra = document.getElementById('promocoes')!;
+  const subBarra = document.getElementById('subfiltros')!;
   const busca = document.getElementById('busca') as HTMLInputElement | null;
   const carregando = document.getElementById('carregando');
   const vazio = document.getElementById('vazio');
@@ -65,38 +76,109 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   // Classe dos botoes de filtro (escrita por extenso para o Tailwind incluir).
   const CLASSE_FILTRO =
     'filtro-btn etiqueta border border-fundo-borda bg-fundo-claro text-texto-suave aria-selected:border-marca aria-selected:bg-marca aria-selected:text-white';
+  const CLASSE_SUB =
+    'sub-btn etiqueta border border-fundo-borda bg-fundo text-texto-suave aria-selected:border-marca aria-selected:bg-marca/10 aria-selected:text-marca-escuro';
 
-  // Le os parametros da URL: ?q=busca e ?cat=categoria.
+  // Le os parametros da URL.
   const params = new URLSearchParams(location.search);
   let produtos: ProdutoView[] = [];
-  let filtroAtual = params.get('cat') || 'todos';
+  let filtroCat = params.get('cat') || 'todos'; // categoria-mae, 'todos' ou 'promocao'
+  let filtroSub = params.get('sub') || ''; // subcategoria especifica
+  let filtroMarca = (params.get('marca') || '').trim();
   let termo = (params.get('q') || '').trim().toLowerCase();
 
+  // Se veio uma subcategoria pela URL, descobre a categoria-mae dela.
+  if (filtroSub) {
+    const mae = categoriaMaeDe(filtroSub);
+    if (mae) filtroCat = mae.slug;
+  }
+
+  /** Categorias-mae que realmente tem produtos cadastrados. */
+  function categoriasComProdutos(): string[] {
+    const presentes = new Set<string>();
+    for (const p of produtos) {
+      const mae = categoriaMaeDe(p.categoria);
+      if (mae) presentes.add(mae.slug);
+      else if (p.categoria) presentes.add(p.categoria); // legado/desconhecida
+    }
+    // Mantem a ordem da arvore; categorias desconhecidas vao para o fim.
+    const ordenadas = arvoreCategorias.map((c) => c.slug).filter((s) => presentes.has(s));
+    const extras = Array.from(presentes).filter((s) => !ordenadas.includes(s));
+    return [...ordenadas, ...extras];
+  }
+
   function montarFiltros() {
-    const categorias = Array.from(new Set(produtos.map((p) => p.categoria).filter(Boolean)));
+    const cats = categoriasComProdutos();
     const temPromo = produtos.some((p) => p.promocao);
 
     const filtros = [
       { valor: 'todos', rotulo: 'Todos' },
-      ...categorias.map((c) => ({ valor: c, rotulo: rotuloCategoria(c) })),
+      ...cats.map((c) => ({ valor: c, rotulo: rotuloDe(c) })),
       ...(temPromo ? [{ valor: 'promocao', rotulo: 'Promoções' }] : []),
     ];
 
-    // Se o filtro vindo da URL nao existir, volta para "todos".
-    if (!filtros.some((f) => f.valor === filtroAtual)) filtroAtual = 'todos';
+    // Se o filtro de categoria vindo da URL nao existir, volta para "todos".
+    if (!filtros.some((f) => f.valor === filtroCat)) filtroCat = 'todos';
 
-    barra.innerHTML = filtros
-      .map(
-        (f) =>
-          `<button type="button" class="${CLASSE_FILTRO}" data-filtro="${esc(f.valor)}" role="tab" aria-selected="${f.valor === filtroAtual ? 'true' : 'false'}">${esc(f.rotulo)}</button>`,
-      )
-      .join('');
+    barra.innerHTML =
+      filtros
+        .map(
+          (f) =>
+            `<button type="button" class="${CLASSE_FILTRO}" data-cat="${esc(f.valor)}" role="tab" aria-selected="${f.valor === filtroCat ? 'true' : 'false'}">${esc(f.rotulo)}</button>`,
+        )
+        .join('') +
+      (filtroMarca
+        ? `<button type="button" id="limpar-marca" class="etiqueta border border-marca bg-marca/10 text-marca-escuro">Marca: ${esc(filtroMarca)} ✕</button>`
+        : '');
 
     barra.querySelectorAll<HTMLButtonElement>('.filtro-btn').forEach((botao) => {
       botao.addEventListener('click', () => {
-        barra.querySelectorAll('.filtro-btn').forEach((b) => b.setAttribute('aria-selected', 'false'));
+        filtroCat = botao.dataset.cat ?? 'todos';
+        filtroSub = ''; // troca de categoria zera a subcategoria
+        montarFiltros();
+        renderizar();
+      });
+    });
+
+    const limparMarca = document.getElementById('limpar-marca');
+    limparMarca?.addEventListener('click', () => {
+      filtroMarca = '';
+      montarFiltros();
+      renderizar();
+    });
+
+    montarSubFiltros();
+  }
+
+  function montarSubFiltros() {
+    const cat = arvoreCategorias.find((c) => c.slug === filtroCat);
+    // So mostra subcategorias quando uma categoria-mae conhecida esta ativa.
+    if (!cat) {
+      subBarra.innerHTML = '';
+      return;
+    }
+
+    // So oferece subcategorias que tem ao menos um produto.
+    const subsComProduto = new Set(produtos.map((p) => p.categoria));
+    const subs = cat.subs.filter((s) => subsComProduto.has(s.slug));
+    if (!subs.length) {
+      subBarra.innerHTML = '';
+      return;
+    }
+
+    const itens = [{ slug: '', rotulo: `Todos de ${cat.rotulo}` }, ...subs];
+    subBarra.innerHTML = itens
+      .map(
+        (s) =>
+          `<button type="button" class="${CLASSE_SUB}" data-sub="${esc(s.slug)}" aria-selected="${s.slug === filtroSub ? 'true' : 'false'}">${esc(s.rotulo)}</button>`,
+      )
+      .join('');
+
+    subBarra.querySelectorAll<HTMLButtonElement>('.sub-btn').forEach((botao) => {
+      botao.addEventListener('click', () => {
+        filtroSub = botao.dataset.sub ?? '';
+        subBarra.querySelectorAll('.sub-btn').forEach((b) => b.setAttribute('aria-selected', 'false'));
         botao.setAttribute('aria-selected', 'true');
-        filtroAtual = botao.dataset.filtro ?? 'todos';
         renderizar();
       });
     });
@@ -104,18 +186,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   function renderizar() {
     const lista = produtos.filter((p) => {
-      // Filtro por categoria/promocao.
-      const passaFiltro =
-        filtroAtual === 'todos'
-          ? true
-          : filtroAtual === 'promocao'
-            ? p.promocao
-            : p.categoria === filtroAtual;
-      if (!passaFiltro) return false;
+      // Marca (independente dos demais filtros).
+      if (filtroMarca && (p.marca || '').trim() !== filtroMarca) return false;
 
-      // Filtro por texto de busca (nome, marca ou categoria).
+      // Subcategoria especifica tem prioridade sobre a categoria-mae.
+      if (filtroSub) {
+        if (p.categoria !== filtroSub) return false;
+      } else if (filtroCat === 'promocao') {
+        if (!p.promocao) return false;
+      } else if (filtroCat !== 'todos') {
+        const mae = categoriaMaeDe(p.categoria);
+        const slugMae = mae ? mae.slug : p.categoria;
+        if (slugMae !== filtroCat) return false;
+      }
+
+      // Busca por texto (nome, marca ou categoria).
       if (termo) {
-        const alvo = `${p.nome} ${p.marca} ${p.categoria}`.toLowerCase();
+        const alvo = `${p.nome} ${p.marca} ${rotuloDe(p.categoria)}`.toLowerCase();
         if (!alvo.includes(termo)) return false;
       }
       return true;
@@ -135,9 +222,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         return;
       }
 
-      // Se a pagina abrir via #promocoes (e sem ?cat), comeca nas promocoes.
-      if (!params.get('cat') && location.hash === '#promocoes' && produtos.some((p) => p.promocao)) {
-        filtroAtual = 'promocao';
+      // Se a pagina abrir via #promocoes (e sem ?cat/?sub), comeca nas promocoes.
+      if (
+        !params.get('cat') &&
+        !params.get('sub') &&
+        location.hash === '#promocoes' &&
+        produtos.some((p) => p.promocao)
+      ) {
+        filtroCat = 'promocao';
       }
 
       montarFiltros();

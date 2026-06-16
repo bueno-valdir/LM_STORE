@@ -5,11 +5,12 @@
  * futura para um CMS sem reescrever o front. As paginas consomem esses tipos.
  */
 
-/** Categorias do catalogo. Ajustar conforme o estoque real. */
-export type Categoria =
-  | 'maquiagem'
-  | 'skincare'
-  | 'kits-presentes';
+/**
+ * Categoria do produto. Guarda o SLUG de uma subcategoria (a folha da arvore),
+ * por exemplo `base`, `batom`, `sombras`. A arvore completa de categorias e
+ * subcategorias fica em src/config/categorias.ts (fonte unica da verdade).
+ */
+export type Categoria = string;
 
 /** Disponibilidade do produto. */
 export type Disponibilidade = 'em-estoque' | 'esgotado';
