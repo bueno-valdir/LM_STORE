@@ -60,11 +60,10 @@ Como configurar no painel:
 > desenvolvimento, sem produtos reais, é seguro). Ao cadastrar, basta digitar o
 > número de tons (ou `0`/vazio para esconder).
 
-## 1.2) Campos de peso e tamanho (para o frete)
+## 1.2) Campos de peso e tamanho
 
-Para o cálculo de frete (quando ligarmos o envio), cada produto precisa de peso
-e dimensões da embalagem. Crie estes campos (tipo **Number**) na coleção
-`produtos` — pode deixar vazios por enquanto:
+Cada produto pode ter peso e dimensões da embalagem. Crie estes campos
+(tipo **Number**) na coleção `produtos` — pode deixar vazios:
 
 | Campo | Tipo | Unidade | Observação |
 |---|---|---|---|
@@ -73,7 +72,28 @@ e dimensões da embalagem. Crie estes campos (tipo **Number**) na coleção
 | `largura_cm` | Number | cm | largura da embalagem |
 | `comprimento_cm` | Number | cm | comprimento da embalagem |
 
-Esses campos **não aparecem** para o cliente no site — servem só para o frete.
+Para que servem:
+
+- **Site:** quando preenchidos, aparecem na página do produto como **Peso**
+  (ex.: `120 g`) e **Dimensões** (ex.: `12 × 4 × 4 cm`). **Campo vazio ou zero
+  não aparece** — e as dimensões só surgem quando os três (altura, largura e
+  comprimento) estiverem preenchidos.
+- **Frete:** os mesmos valores serão usados no cálculo de envio quando ligarmos.
+
+### Jeito rápido de criar (sem mexer campo a campo no painel)
+
+Em vez de criar os campos na mão, dá para rodar um script que cria o que faltar
+de uma vez (peso, tamanho e o `tom`). Ele é **idempotente**: só adiciona o que
+não existe, sem alterar nada já cadastrado.
+
+```bash
+PB_URL="https://painel.lmstore.veraxlegalops.com.br" \
+PB_ADMIN_EMAIL="seu-email-admin" \
+PB_ADMIN_SENHA="sua-senha" \
+node scripts/configurar-campos-produto.mjs
+```
+
+Use `--dry-run` para só ver o que seria criado, sem gravar.
 
 ## 1.3) Estoque (unidades) — reflete no site
 

@@ -69,8 +69,20 @@ import { withBase } from '../lib/url';
          </div>`
       : '<span class="text-lg font-medium text-texto-suave">Consulte o valor no WhatsApp</span>';
 
+    // Atributos: so aparecem quando preenchidos (vazio ou zero nao mostra).
+    const positivo = (n: number | null): n is number => typeof n === 'number' && n > 0;
+    const dimensoes =
+      positivo(p.alturaCm) && positivo(p.larguraCm) && positivo(p.comprimentoCm)
+        ? `${p.alturaCm} × ${p.larguraCm} × ${p.comprimentoCm} cm`
+        : '';
+    const linhaAtributo = (rotulo: string, valor: string) =>
+      valor
+        ? `<div class="flex gap-2"><dt class="font-semibold text-texto">${rotulo}:</dt><dd>${esc(valor)}</dd></div>`
+        : '';
     const atributos = [
-      p.volume ? `<div class="flex gap-2"><dt class="font-semibold text-texto">Volume:</dt><dd>${esc(p.volume)}</dd></div>` : '',
+      linhaAtributo('Volume', p.volume ?? ''),
+      linhaAtributo('Peso', positivo(p.pesoG) ? `${p.pesoG} g` : ''),
+      linhaAtributo('Dimensões', dimensoes),
     ].join('');
 
     // Seletor de tom: aparece so quando o produto tem 1 ou mais tons.
@@ -113,7 +125,7 @@ import { withBase } from '../lib/url';
 
           <div class="mt-5">${precoBloco}</div>
 
-          <dl class="mt-4 space-y-1 text-sm text-texto-suave">${atributos}</dl>
+          ${atributos ? `<dl class="mt-4 space-y-1 text-sm text-texto-suave">${atributos}</dl>` : ''}
 
           ${tomBloco}
 

@@ -38,6 +38,12 @@ export interface ProdutoView {
    */
   estoque: number | null;
   volume: string | null;
+  /** Peso do produto com embalagem, em gramas. null/0 = nao informado (oculto). */
+  pesoG: number | null;
+  /** Dimensoes da embalagem, em cm. null/0 = nao informado (ocultas). */
+  alturaCm: number | null;
+  larguraCm: number | null;
+  comprimentoCm: number | null;
   imagens: { src: string; alt: string }[];
   disponivel: boolean;
   destaque: boolean;
@@ -178,6 +184,10 @@ function mapear(rec: any): ProdutoView {
     estoqueTons,
     estoque,
     volume: rec.volume || null,
+    pesoG: num(rec.peso_g),
+    alturaCm: num(rec.altura_cm),
+    larguraCm: num(rec.largura_cm),
+    comprimentoCm: num(rec.comprimento_cm),
     imagens: imagens.length
       ? imagens
       : [{ src: withBase('/images/products/placeholder-1.svg'), alt: rec.nome || 'Produto' }],
