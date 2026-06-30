@@ -1,0 +1,104 @@
+/* =========================================================================
+   Lojinha da Miih — CSS para a Nuvemshop (tema: Recife)
+
+   COMO USAR:
+   1) Antes do CSS, ajuste o que der pelo EDITOR VISUAL do tema Recife
+      (Loja online -> Layout -> Personalizar): cor principal = #ff1493,
+      fundo do cabecalho/rodape = #0e0e0f, fonte de titulos = Poppins,
+      fonte de texto = Inter, e a barra de anuncios (topo rosa).
+   2) Cole este arquivo no campo de CSS personalizado do tema
+      (ou no editor de codigo do tema, no arquivo CSS).
+
+   OBS: os nomes de classe do Recife podem ser diferentes. Se algum trecho
+   nao "pegar" (ex.: botao nao fica rosa), inspecione o elemento no navegador
+   (botao direito -> Inspecionar) e me mande a classe que eu ajusto certeiro.
+
+   Fonte da verdade das cores: tailwind.config.mjs deste projeto.
+   ========================================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500;600&family=Dancing+Script:wght@600;700&display=swap');
+
+:root{
+  --miih-rosa:#ff1493;
+  --miih-rosa-escuro:#d60f77;
+  --miih-rosa-claro:#ff66b8;
+  --miih-preto:#0e0e0f;
+  --miih-branco:#ffffff;
+  --miih-secao:#faf7f9;
+  --miih-borda:#ece7ea;
+  --miih-texto:#141215;
+  --miih-texto-suave:#615b62;
+  --miih-raio:1.25rem;
+  --miih-grad:linear-gradient(135deg,#ff1493 0%,#ff66b8 100%);
+}
+
+/* ---- Tipografia ---- */
+body{
+  font-family:"Inter",system-ui,sans-serif;
+  color:var(--miih-texto);
+  background:var(--miih-branco);
+}
+h1,h2,h3,h4,.h1,.h2,.h3{
+  font-family:"Poppins",system-ui,sans-serif;
+  font-weight:700;
+}
+
+/* ---- Cabecalho e rodape pretos ---- */
+.header, header, .navbar, .footer, footer{
+  background:var(--miih-preto);
+  color:#fff;
+}
+.header a, header a, .navbar a, .footer a, footer a{ color:#fff; }
+
+/* ---- Barra de anuncios (topo rosa) ---- */
+.announcement-bar, .top-bar, [class*="announcement"], [class*="topbar"]{
+  background:var(--miih-rosa);
+  color:#fff;
+  font-weight:600;
+}
+
+/* ---- Botoes principais: rosa, arredondado, sombra suave ---- */
+.btn, .button, [class*="btn-primary"], [class*="js-addtocart"], button[type="submit"]{
+  background:var(--miih-rosa);
+  color:#fff;
+  border:none;
+  border-radius:var(--miih-raio);
+  font-family:"Poppins",sans-serif;
+  font-weight:600;
+  box-shadow:0 10px 30px -14px rgba(255,20,147,.35);
+  transition:background .2s ease;
+}
+.btn:hover, .button:hover, [class*="btn-primary"]:hover, button[type="submit"]:hover{
+  background:var(--miih-rosa-escuro);
+}
+
+/* ---- Botao secundario / contorno ---- */
+.btn-outline, .btn-default, [class*="btn-secondary"]{
+  background:#fff;
+  color:var(--miih-texto);
+  border:1px solid var(--miih-borda);
+  border-radius:var(--miih-raio);
+}
+.btn-outline:hover, .btn-default:hover, [class*="btn-secondary"]:hover{
+  border-color:var(--miih-rosa);
+  color:var(--miih-rosa);
+}
+
+/* ---- Titulo com gradiente rosa (aplique numa palavra de destaque) ---- */
+.miih-destaque{
+  background:var(--miih-grad);
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+}
+
+/* ---- Cards de produto e secoes suaves ---- */
+.card, [class*="product-item"], [class*="js-item-product"]{
+  border-radius:var(--miih-raio);
+  border:1px solid var(--miih-borda);
+}
+section.alt, .section--soft{ background:var(--miih-secao); }
+
+/* ---- Links e precos em destaque no rosa da marca ---- */
+a:hover{ color:var(--miih-rosa-escuro); }
+.price, [class*="product-price"]{ color:var(--miih-texto); font-weight:700; }
