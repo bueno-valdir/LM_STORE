@@ -1,0 +1,7 @@
+# Fase de desenvolvimento: pedimos para os buscadores NAO indexarem o site.
+# Ao publicar a versao final, troque para "Allow: /" e reative o Sitemap.
+User-agent: *
+Disallow: /
+
+# Sitemap (reativar ao sair de desenvolvimento):
+# Sitemap: https://lmstore.veraxlegalops.com.br/sitemap-index.xml
